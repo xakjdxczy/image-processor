@@ -30,6 +30,8 @@
       color: var(--text);
       background: var(--bg);
       overflow: hidden;
+      -webkit-user-select: none;
+      user-select: none;
     }
 
     .aurora,
@@ -551,6 +553,8 @@
       if (event.button !== 0) return;
       pulse(event.clientX, event.clientY);
     });
+    document.addEventListener("selectstart", (event) => event.preventDefault());
+    document.addEventListener("dblclick", (event) => event.preventDefault());
     document.addEventListener("visibilitychange", () => {
       const shouldRun = !document.hidden && !reduceMotion;
       if (shouldRun && !running) {
