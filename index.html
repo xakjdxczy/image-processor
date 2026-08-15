@@ -36,7 +36,9 @@
     .sun,
     .floor-wrap,
     canvas#fx,
-    .ring {
+    .ring,
+    .cursor-glow,
+    .cursor-dot {
       pointer-events: none;
     }
 
@@ -45,7 +47,6 @@
       width: 55vw;
       height: 55vw;
       border-radius: 50%;
-      filter: none;
       opacity: 0.55;
       will-change: transform;
     }
@@ -118,6 +119,15 @@
       opacity: 0.8;
     }
 
+    .hud span {
+      transition: color 0.18s ease, text-shadow 0.18s ease;
+    }
+
+    .hud span:hover {
+      color: var(--magenta);
+      text-shadow: 0 0 12px rgba(255, 74, 216, 0.7);
+    }
+
     main {
       position: relative;
       z-index: 2;
@@ -151,6 +161,7 @@
       position: absolute;
       inset: 0;
       opacity: 0.38;
+      pointer-events: none;
     }
 
     .title::before {
@@ -163,11 +174,34 @@
       transform: translate(2px, 0);
     }
 
+    .title span {
+      position: relative;
+      z-index: 1;
+      display: inline-block;
+      transition: transform 0.16s ease, color 0.16s ease, text-shadow 0.16s ease;
+    }
+
+    .title span.is-space {
+      width: 0.35em;
+    }
+
+    .title span:hover {
+      color: var(--cyan);
+      transform: translateY(-12px) scale(1.12);
+      text-shadow: 0 0 18px rgba(61, 231, 255, 0.85);
+    }
+
     .lead {
       margin: 1.15rem 0 1.7rem;
       color: var(--muted);
       font-size: clamp(1rem, 2.2vw, 1.15rem);
       animation: rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both;
+      transition: color 0.18s ease, text-shadow 0.18s ease;
+    }
+
+    .lead:hover {
+      color: var(--text);
+      text-shadow: 0 0 14px rgba(61, 231, 255, 0.35);
     }
 
     .cta {
@@ -184,11 +218,15 @@
       cursor: pointer;
       box-shadow: 0 0 20px rgba(61, 231, 255, 0.16);
       animation: rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+      transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
     }
 
     .cta:hover,
     .cta:focus-visible {
+      transform: translateY(-3px) scale(1.05);
       border-color: var(--magenta);
+      background: rgba(255, 74, 216, 0.16);
+      box-shadow: 0 0 28px rgba(255, 74, 216, 0.35);
       outline: none;
     }
 
@@ -205,6 +243,40 @@
 
     .ring.on {
       animation: shock 620ms ease-out forwards;
+    }
+
+    .cursor-glow {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 160px;
+      height: 160px;
+      margin: -80px 0 0 -80px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(61, 231, 255, 0.3), transparent 68%);
+      z-index: 5;
+      will-change: transform;
+    }
+
+    .cursor-glow.hot {
+      background: radial-gradient(circle, rgba(255, 74, 216, 0.36), rgba(61, 231, 255, 0.16) 46%, transparent 70%);
+    }
+
+    .cursor-dot {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 8px;
+      height: 8px;
+      margin: -4px 0 0 -4px;
+      border-radius: 50%;
+      background: var(--cyan);
+      z-index: 5;
+      will-change: transform;
+    }
+
+    .cursor-dot:nth-child(odd) {
+      background: var(--magenta);
     }
 
     @keyframes drift-a {
@@ -249,6 +321,16 @@
       .ring {
         animation: none !important;
       }
+
+      .cursor-glow,
+      .cursor-dot {
+        display: none;
+      }
+
+      .title span:hover,
+      .cta:hover {
+        transform: none;
+      }
     }
   </style>
 </head>
@@ -259,14 +341,16 @@
   <div class="floor-wrap" aria-hidden="true"><div class="floor"></div></div>
   <canvas id="fx" aria-hidden="true"></canvas>
   <div class="ring" id="ring" aria-hidden="true"></div>
+  <div class="cursor-glow" id="glow" aria-hidden="true"></div>
+  <div id="trail" aria-hidden="true"></div>
   <div class="hud">
     <span>NEON / SIGNAL</span>
     <span id="clock">00:00:00</span>
   </div>
   <main>
     <div class="stage" id="stage">
-      <h1 class="title" data-text="Hello World">Hello World</h1>
-      <p class="lead">深空频道已接通——点击释放一次脉冲。</p>
+      <h1 class="title" id="title" data-text="Hello World" aria-label="Hello World"></h1>
+      <p class="lead">移动、悬停、点击任意位置，频道都会回应。</p>
       <button class="cta" id="burst" type="button">释放脉冲</button>
     </div>
   </main>
@@ -274,12 +358,36 @@
     const canvas = document.getElementById("fx");
     const ctx = canvas.getContext("2d", { alpha: true, desynchronized: true });
     const stage = document.getElementById("stage");
-    const burstBtn = document.getElementById("burst");
+    const title = document.getElementById("title");
+    const glow = document.getElementById("glow");
+    const trailRoot = document.getElementById("trail");
     const ring = document.getElementById("ring");
     const clock = document.getElementById("clock");
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    const MAX = 56;
+    title.replaceChildren(
+      ..."Hello World".split("").map((char) => {
+        const span = document.createElement("span");
+        if (char === " ") {
+          span.className = "is-space";
+          span.innerHTML = "&nbsp;";
+        } else {
+          span.textContent = char;
+        }
+        return span;
+      })
+    );
+
+    const TRAIL = 6;
+    const trail = [];
+    for (let i = 0; i < TRAIL; i += 1) {
+      const el = document.createElement("div");
+      el.className = "cursor-dot";
+      trailRoot.appendChild(el);
+      trail.push({ el, x: innerWidth / 2, y: innerHeight / 2 });
+    }
+
+    const MAX = 64;
     const CYAN = "rgba(61, 231, 255, 0.9)";
     const MAGENTA = "rgba(255, 74, 216, 0.9)";
     const particles = new Array(MAX);
@@ -288,6 +396,12 @@
     let height = 0;
     let stars = null;
     let running = !reduceMotion;
+    let glowX = mouse.x;
+    let glowY = mouse.y;
+    let px = 0;
+    let py = 0;
+    let parallaxDirty = false;
+    let lastTrailSpawn = 0;
 
     function makeParticle() {
       return { x: 0, y: 0, vx: 0, vy: 0, life: 0, max: 0, cyan: true, size: 2 };
@@ -319,6 +433,19 @@
       }
     }
 
+    function spawnTrail(x, y) {
+      const p = grab();
+      if (!p) return;
+      p.x = x;
+      p.y = y;
+      p.vx = (Math.random() - 0.5) * 0.4;
+      p.vy = (Math.random() - 0.5) * 0.4;
+      p.max = 18;
+      p.life = 18;
+      p.cyan = Math.random() > 0.5;
+      p.size = 2;
+    }
+
     function buildStars() {
       stars = document.createElement("canvas");
       stars.width = width;
@@ -339,17 +466,31 @@
       buildStars();
     }
 
-    let px = 0;
-    let py = 0;
-    let parallaxDirty = false;
-
-    function tick() {
+    function tick(now) {
       if (!running) return;
+      glowX += (mouse.x - glowX) * 0.28;
+      glowY += (mouse.y - glowY) * 0.28;
+      glow.style.transform = "translate3d(" + glowX + "px," + glowY + "px,0)";
+
+      let tx = glowX;
+      let ty = glowY;
+      for (let i = 0; i < TRAIL; i += 1) {
+        const dot = trail[i];
+        dot.x += (tx - dot.x) * (0.34 - i * 0.03);
+        dot.y += (ty - dot.y) * (0.34 - i * 0.03);
+        const scale = 1 - i * 0.12;
+        dot.el.style.transform = "translate3d(" + dot.x + "px," + dot.y + "px,0) scale(" + scale + ")";
+        dot.el.style.opacity = String(0.7 - i * 0.09);
+        tx = dot.x;
+        ty = dot.y;
+      }
+
       if (parallaxDirty) {
         stage.style.setProperty("--px", px);
         stage.style.setProperty("--py", py);
         parallaxDirty = false;
       }
+
       ctx.clearRect(0, 0, width, height);
       if (stars) ctx.drawImage(stars, 0, 0);
 
@@ -388,6 +529,10 @@
       if (!reduceMotion) spawn(x, y, 20, true);
     }
 
+    function isHotTarget(node) {
+      return Boolean(node && node.closest && node.closest(".title, .cta, .lead, .hud"));
+    }
+
     window.addEventListener("resize", resize, { passive: true });
     window.addEventListener("pointermove", (event) => {
       mouse.x = event.clientX;
@@ -395,8 +540,17 @@
       px = (event.clientX / innerWidth - 0.5).toFixed(3);
       py = (event.clientY / innerHeight - 0.5).toFixed(3);
       parallaxDirty = true;
+      glow.classList.toggle("hot", isHotTarget(event.target));
+      const now = performance.now();
+      if (!reduceMotion && now - lastTrailSpawn > 32) {
+        spawnTrail(event.clientX, event.clientY);
+        lastTrailSpawn = now;
+      }
     }, { passive: true });
-    burstBtn.addEventListener("click", (event) => pulse(event.clientX, event.clientY));
+    window.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0) return;
+      pulse(event.clientX, event.clientY);
+    });
     document.addEventListener("visibilitychange", () => {
       const shouldRun = !document.hidden && !reduceMotion;
       if (shouldRun && !running) {
