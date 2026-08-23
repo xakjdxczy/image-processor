@@ -132,7 +132,15 @@
 
     .room-meta strong { color: var(--ink); }
 
-    .plan-frame object, .plan-frame img { width: 100%; height: auto; }
+    .plan-frame object,
+    .plan-frame img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .plan-frame object {
+      aspect-ratio: 1000 / 740;
+    }
 
     .gallery {
       display: grid;
