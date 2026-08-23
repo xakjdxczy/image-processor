@@ -7,25 +7,24 @@ SCALE = 52
 OX, OY = 96, 82
 PLAN_W, PLAN_H = 15.0, 10.0
 
-# name, x, y, w, h, fill, english
-# Grid: x 0 / 3.60 / 7.20 / 9.60 / 12.00 / 15.00
-#       y 0 / 2.80 / 5.80 / 8.60 / 10.00
+# name, x, y, w, h, fill, english, slug
+# Public living-dining is 5.40m wide × 5.80m deep so the sofa wall actually fits.
 ROOMS = [
-    ("厨房", 0.00, 0.00, 3.60, 2.80, "#f3d6c4", "Kitchen"),
-    ("生活阳台", 3.60, 0.00, 1.80, 2.80, "#d9ead3", "Service balcony"),
-    ("玄关", 5.40, 0.00, 1.80, 2.80, "#efe6d6", "Foyer"),
-    ("书房", 7.20, 0.00, 4.80, 2.80, "#d7e4f0", "Study"),
-    ("次卧B", 12.00, 0.00, 3.00, 2.80, "#e4edd8", "Bedroom B"),
-    ("餐厅", 0.00, 2.80, 3.60, 3.00, "#f7e6c8", "Dining"),
-    ("走廊储物", 3.60, 2.80, 3.60, 3.00, "#f4efe4", "Hall / storage"),
-    ("客卫", 7.20, 2.80, 2.40, 3.00, "#dde3ea", "Guest bath"),
-    ("衣帽间", 9.60, 2.80, 2.40, 3.00, "#efe0cc", "Walk-in closet"),
-    ("次卧A", 12.00, 2.80, 3.00, 3.00, "#dce8cc", "Bedroom A"),
-    ("客厅", 0.00, 5.80, 7.20, 2.80, "#f8e3c2", "Living"),
-    ("主卫", 7.20, 5.80, 2.40, 2.80, "#d5dce6", "Master bath"),
-    ("主卧", 9.60, 5.80, 5.40, 4.20, "#eadcc4", "Master bedroom"),
-    ("南阳台", 0.00, 8.60, 7.20, 1.40, "#cfe3c8", "South balcony"),
-    ("主卫淋浴", 7.20, 8.60, 2.40, 1.40, "#d5dce6", "Master shower"),
+    ("厨房", 0.00, 0.00, 3.60, 2.80, "#f3d6c4", "Kitchen", "kitchen"),
+    ("生活阳台", 3.60, 0.00, 1.80, 2.80, "#d9ead3", "Service balcony", "service-balcony"),
+    ("玄关", 5.40, 0.00, 1.80, 2.80, "#efe6d6", "Foyer", "foyer"),
+    ("书房", 7.20, 0.00, 4.80, 2.80, "#d7e4f0", "Study", "study"),
+    ("次卧B", 12.00, 0.00, 3.00, 2.80, "#e4edd8", "Bedroom B", "bedroom-b"),
+    ("餐厅", 0.00, 2.80, 5.40, 2.00, "#f7e6c8", "Dining", "dining"),
+    ("走廊储物", 5.40, 2.80, 1.80, 5.80, "#f4efe4", "Hall / storage", "hall"),
+    ("客卫", 7.20, 2.80, 2.40, 3.00, "#dde3ea", "Guest bath", "guest-bath"),
+    ("衣帽间", 9.60, 2.80, 2.40, 3.00, "#efe0cc", "Walk-in closet", "wic"),
+    ("次卧A", 12.00, 2.80, 3.00, 3.00, "#dce8cc", "Bedroom A", "bedroom-a"),
+    ("客厅", 0.00, 4.80, 5.40, 3.80, "#f8e3c2", "Living", "living"),
+    ("主卫", 7.20, 5.80, 2.40, 2.80, "#d5dce6", "Master bath", "master-bath"),
+    ("主卧", 9.60, 5.80, 5.40, 4.20, "#eadcc4", "Master bedroom", "master"),
+    ("南阳台", 0.00, 8.60, 7.20, 1.40, "#cfe3c8", "South balcony", "south-balcony"),
+    ("主卫淋浴", 7.20, 8.60, 2.40, 1.40, "#d5dce6", "Master shower", "master-bath"),
 ]
 
 
@@ -45,7 +44,7 @@ def verify():
     step = 0.10
     cells = {}
     overlaps = []
-    for name, x, y, w, h, _fill, _en in ROOMS:
+    for name, x, y, w, h, _fill, _en, _slug in ROOMS:
         xi = 0
         while xi < w - 1e-9:
             yi = 0
@@ -124,19 +123,24 @@ def furniture():
             f'fill="none" stroke="#53493c" stroke-width="1.15"/>'
         )
 
-    stroke_rect(0.30, 6.15, 2.70, 0.80)
-    stroke_rect(0.30, 6.15, 0.80, 2.10)
-    stroke_oval(1.45, 7.00, 1.15, 0.70)
-    stroke_rect(6.15, 6.20, 0.40, 1.90)
-    stroke_oval(0.70, 3.45, 2.20, 1.20)
+    # Living: sofa on west, TV on east, table center — 3.80m depth
+    stroke_rect(0.25, 5.15, 0.85, 2.70)
+    stroke_rect(0.25, 7.00, 2.40, 0.85)
+    stroke_oval(1.70, 6.20, 1.20, 0.75)
+    stroke_rect(4.85, 5.50, 0.40, 2.00)
+    # Dining
+    stroke_oval(1.40, 3.10, 2.40, 1.30)
+    # Kitchen U
     stroke_rect(0.12, 0.12, 3.36, 0.58)
     stroke_rect(0.12, 0.12, 0.58, 2.56)
     stroke_rect(2.90, 0.80, 0.58, 1.88)
+    # Beds
     stroke_rect(10.40, 7.20, 2.00, 2.00)
     stroke_rect(12.25, 3.20, 1.80, 1.50)
     stroke_rect(12.25, 0.35, 1.80, 1.40)
     stroke_rect(7.45, 0.35, 1.60, 0.70)
     stroke_rect(11.40, 0.20, 0.40, 2.40)
+    # Baths
     stroke_oval(7.45, 6.40, 1.70, 0.80)
     stroke_rect(7.40, 8.75, 1.00, 1.05)
     stroke_rect(7.40, 3.05, 0.90, 0.90)
@@ -166,54 +170,44 @@ def openings():
 def build(total):
     display = []
     for room in ROOMS:
-        name, x, y, w, h, fill, en = room
+        name, x, y, w, h, fill, en, slug = room
         if name == "主卫淋浴":
             continue
         if name == "主卫":
             w, h = 2.40, 4.20
         X, Y, W, H = box(x, y, w, h)
-        slug = {
-            "Kitchen": "kitchen",
-            "Service balcony": "service-balcony",
-            "Foyer": "foyer",
-            "Study": "study",
-            "Bedroom B": "bedroom-b",
-            "Dining": "dining",
-            "Hall / storage": "hall",
-            "Guest bath": "guest-bath",
-            "Walk-in closet": "wic",
-            "Bedroom A": "bedroom-a",
-            "Living": "living",
-            "Master bath": "master-bath",
-            "Master bedroom": "master",
-            "South balcony": "south-balcony",
-            "Master shower": "master-bath",
-        }[en]
         display.append(
             f'<rect class="room" data-room="{slug}" x="{X}" y="{Y}" width="{W}" height="{H}" '
             f'fill="{fill}" stroke="#2a241c" stroke-width="2.2"/>'
         )
 
+    # Dashed opening between dining and living
+    x1, y1, w1, _h1 = box(0.15, 4.80, 5.10, 0)
+    display.append(
+        f'<line x1="{x1}" y1="{y1}" x2="{x1 + w1}" y2="{y1}" stroke="#2a241c" '
+        f'stroke-width="1.4" stroke-dasharray="8 6"/>'
+    )
+
     labels = []
     labeled = {
         "厨房": (1.80, 1.40),
         "生活阳台": (4.50, 1.40),
-        "玄关": (6.30, 1.40),
+        "玄关": (6.30, 1.25),
         "书房": (9.60, 1.40),
         "次卧B": (13.50, 1.40),
-        "餐厅": (1.80, 4.30),
-        "走廊储物": (5.40, 4.30),
+        "餐厅": (2.70, 3.80),
+        "走廊储物": (6.30, 5.40),
         "客卫": (8.40, 4.30),
         "衣帽间": (10.80, 4.30),
         "次卧A": (13.50, 4.30),
-        "客厅": (3.60, 7.10),
+        "客厅": (2.70, 6.70),
         "主卫": (8.40, 7.90),
         "主卧": (12.30, 7.50),
         "南阳台": (3.60, 9.30),
     }
     areas = {r[0]: area(r) for r in ROOMS}
     areas["主卫"] = round(areas["主卫"] + areas.get("主卫淋浴", 0), 2)
-    for name, x, y, w, h, fill, en in ROOMS:
+    for name, x, y, w, h, fill, en, slug in ROOMS:
         if name == "主卫淋浴":
             continue
         cx, cy = labeled[name]
@@ -228,7 +222,7 @@ def build(total):
     return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 740" role="img"
       aria-labelledby="planTitle planDesc">
   <title id="planTitle">150㎡ 四室两厅两卫 平面布置图</title>
-  <desc id="planDesc">南向住宅，面宽 15.00 米，进深 10.00 米，套内合计 {total:.0f} 平方米。</desc>
+  <desc id="planDesc">南向住宅，面宽 15.00 米，进深 10.00 米，套内合计 {total:.0f} 平方米。客餐厅进深 5.80 米。</desc>
   <rect width="1000" height="740" fill="#fbf7ef"/>
   <g id="rooms">{''.join(display)}</g>
   <g id="furniture" opacity="0.88">{furniture()}</g>
@@ -237,12 +231,14 @@ def build(total):
   <line x1="{OX + px(7.2)}" y1="{OY + px(8.6)}" x2="{OX + px(9.6)}" y2="{OY + px(8.6)}"
     stroke="#2a241c" stroke-width="2.2"/>
   <g id="labels">{''.join(labels)}</g>
-  {dim_h(0, -0.58, 7.20, "7200")}
+  {dim_h(0, -0.58, 5.40, "5400")}
+  {dim_h(5.40, -0.58, 1.80, "1800")}
   {dim_h(7.20, -0.58, 4.80, "4800")}
   {dim_h(12.00, -0.58, 3.00, "3000")}
   {dim_h(0, 10.58, 15.00, "15000")}
-  {dim_v(-0.58, 0, 5.80, "5800")}
-  {dim_v(-0.58, 5.80, 4.20, "4200")}
+  {dim_v(-0.58, 0, 2.80, "2800")}
+  {dim_v(-0.58, 2.80, 5.80, "5800")}
+  {dim_v(-0.58, 8.60, 1.40, "1400")}
   {dim_v(15.58, 0, 10.00, "10000")}
   <g transform="translate({nx},{ny})">
     <polygon points="0,-22 8,10 -8,10" fill="#1b1610"/>
@@ -256,7 +252,7 @@ def build(total):
     {text(px(2.5), 20, "0 — 5 m", 12, 500)}
   </g>
   {text(OX + px(7.5), 34, "150㎡ 四室两厅两卫　平面布置图", 22, 700)}
-  {text(OX + px(7.5), 56, f"南向 · 面宽 15.00m · 进深 10.00m · 套内 {total:.0f}㎡ · 比例 1:50", 13, 400, "#6b5a3e")}
+  {text(OX + px(7.5), 56, f"南向 · 面宽 15.00m · 进深 10.00m · 套内 {total:.0f}㎡ · 客餐厅进深 5.80m · 比例 1:50", 13, 400, "#6b5a3e")}
 </svg>
 """
 
@@ -267,13 +263,8 @@ if __name__ == "__main__":
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(build(total), encoding="utf-8")
     print(f"wrote {out} total={total}")
-    merged = []
     for room in ROOMS:
         if room[0] == "主卫淋浴":
             continue
-        a = round(area(room) + 3.36, 2) if room[0] == "主卫" else area(room)
-        if room[0] == "主卫淋浴":
-            continue
-        merged.append((room[0], a, room[6]))
-    for name, a, en in merged:
-        print(f"  {name:8s} {a:6.2f}  {en}")
+        a = round(area(room) + (3.36 if room[0] == "主卫" else 0), 2)
+        print(f"  {room[0]:8s} {a:6.2f}  {room[6]}")
