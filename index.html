@@ -3,581 +3,558 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hello World</title>
+  <title>150㎡ 四室两厅 · 现代轻奢原木装修设计图</title>
+  <meta name="description" content="150 平方米南向四室两厅两卫装修设计图：平面布置、灯具布置、空间效果与材料说明。" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='%231b1610'/><text x='32' y='42' text-anchor='middle' font-size='28' fill='%23e8d5a3'>150</text></svg>" />
   <style>
     :root {
-      --bg: #05060f;
-      --cyan: #3de7ff;
-      --magenta: #ff4ad8;
-      --text: #f4fbff;
-      --muted: #9bb3c7;
-      --px: 0;
-      --py: 0;
+      --paper: #f6f1e8;
+      --ink: #1f1a14;
+      --muted: #6b6358;
+      --line: #d8cfc0;
+      --gold: #8b6914;
+      --gold-soft: #c4a35a;
+      --card: #fffdf8;
+      --shadow: 0 18px 50px rgba(31, 26, 20, 0.08);
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    html, body {
-      height: 100%;
-    }
-
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
-      font-family: "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-      color: var(--text);
-      background: var(--bg);
-      overflow: hidden;
-      -webkit-user-select: none;
-      user-select: none;
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Segoe UI", sans-serif;
+      line-height: 1.65;
     }
 
-    .aurora,
-    .sun,
-    .floor-wrap,
-    canvas#fx,
-    .ring,
-    .cursor-glow,
-    .cursor-dot {
-      pointer-events: none;
+    a { color: inherit; }
+    img { max-width: 100%; display: block; }
+
+    .wrap { width: min(1120px, calc(100% - 2rem)); margin: 0 auto; }
+
+    header.site {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(14px);
+      background: rgba(246, 241, 232, 0.88);
+      border-bottom: 1px solid var(--line);
     }
 
-    .aurora {
-      position: fixed;
-      width: 55vw;
-      height: 55vw;
-      border-radius: 50%;
-      opacity: 0.55;
-      will-change: transform;
+    header.site .wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      min-height: 64px;
     }
 
-    .aurora-a {
-      top: -12%;
-      left: -8%;
-      background: radial-gradient(circle at 40% 40%, rgba(61, 231, 255, 0.55), transparent 62%);
-      animation: drift-a 14s ease-in-out infinite alternate;
+    .brand {
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 0.82rem;
+      text-decoration: none;
     }
 
-    .aurora-b {
-      right: -10%;
-      bottom: 8%;
-      width: 48vw;
-      height: 48vw;
-      background: radial-gradient(circle at 50% 50%, rgba(255, 74, 216, 0.42), transparent 64%);
-      animation: drift-b 18s ease-in-out infinite alternate;
+    nav { display: flex; flex-wrap: wrap; gap: 0.9rem 1.15rem; }
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.92rem;
+    }
+    nav a:hover, nav a:focus-visible { color: var(--gold); }
+
+    .hero {
+      padding: 4.5rem 0 3rem;
+      border-bottom: 1px solid var(--line);
     }
 
-    .sun {
-      position: fixed;
-      left: 50%;
-      bottom: 34%;
-      width: min(48vw, 26rem);
-      height: min(48vw, 26rem);
-      transform: translateX(-50%);
-      background: radial-gradient(circle, rgba(255, 214, 120, 0.7) 0%, rgba(255, 74, 216, 0.28) 38%, transparent 70%);
+    .kicker {
+      color: var(--gold);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-size: 0.78rem;
+      font-weight: 600;
     }
 
-    .floor-wrap {
-      position: fixed;
-      inset: 48% 0 0;
-      perspective: 420px;
+    h1, h2, h3 { font-family: "Iowan Old Style", "Palatino Linotype", "Songti SC", serif; line-height: 1.2; }
+    h1 { font-size: clamp(2.2rem, 6vw, 4.1rem); margin: 0.45rem 0 0.8rem; font-weight: 650; }
+    h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); margin: 0 0 0.75rem; }
+    h3 { font-size: 1.2rem; margin: 0 0 0.4rem; }
+
+    .lead { font-size: 1.12rem; color: var(--muted); max-width: 42rem; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-top: 2.2rem;
     }
 
-    .floor {
-      height: 220%;
-      background-image:
-        linear-gradient(rgba(61, 231, 255, 0.42) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(61, 231, 255, 0.38) 1px, transparent 1px);
-      background-size: 56px 56px;
-      transform: rotateX(66deg);
-      transform-origin: center top;
-      mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.95), transparent 88%);
-      animation: rush 7s linear infinite;
-      will-change: transform;
+    .stat {
+      padding: 1rem 1.05rem;
+      background: var(--card);
+      border: 1px solid var(--line);
     }
 
-    canvas#fx {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 1;
+    .stat b { display: block; font-size: 1.45rem; font-family: "Iowan Old Style", "Palatino Linotype", serif; }
+    .stat span { color: var(--muted); font-size: 0.88rem; }
+
+    section { padding: 3.4rem 0; border-bottom: 1px solid var(--line); }
+
+    .section-head { max-width: 40rem; margin-bottom: 1.6rem; }
+    .section-head p { color: var(--muted); margin: 0; }
+
+    .plan-frame, .media-card, .gallery figure, .palette, .table-wrap {
+      background: var(--card);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
     }
 
-    .hud {
-      position: fixed;
-      top: 1.15rem;
-      left: 1.15rem;
-      right: 1.15rem;
-      z-index: 3;
+    .plan-frame { padding: 0.8rem 0.8rem 0.4rem; }
+
+    .plan-tools {
       display: flex;
       justify-content: space-between;
-      font-size: 0.72rem;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--cyan);
-      opacity: 0.8;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: end;
+      margin-bottom: 1rem;
     }
 
-    .hud span {
-      transition: color 0.18s ease, text-shadow 0.18s ease;
-    }
-
-    .hud span:hover {
-      color: var(--magenta);
-      text-shadow: 0 0 12px rgba(255, 74, 216, 0.7);
-    }
-
-    main {
-      position: relative;
-      z-index: 2;
-      min-height: 100%;
-      display: grid;
-      place-items: center;
-      padding: 2rem 1.25rem 18vh;
-      text-align: center;
-    }
-
-    .stage {
-      transform: translate3d(calc(var(--px) * 10px), calc(var(--py) * 8px), 0);
-      will-change: transform;
-    }
-
-    .title {
-      position: relative;
-      font-weight: 800;
-      font-size: clamp(2.5rem, 11vw, 6.6rem);
-      line-height: 0.92;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      color: #fff;
-      text-shadow: 0 0 22px rgba(61, 231, 255, 0.4);
-      animation: rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
-    }
-
-    .title::before,
-    .title::after {
-      content: attr(data-text);
-      position: absolute;
-      inset: 0;
-      opacity: 0.38;
-      pointer-events: none;
-    }
-
-    .title::before {
-      color: var(--cyan);
-      transform: translate(-2px, 0);
-    }
-
-    .title::after {
-      color: var(--magenta);
-      transform: translate(2px, 0);
-    }
-
-    .title span {
-      position: relative;
-      z-index: 1;
-      display: inline-block;
-      transition: transform 0.16s ease, color 0.16s ease, text-shadow 0.16s ease;
-    }
-
-    .title span.is-space {
-      width: 0.35em;
-    }
-
-    .title span:hover {
-      color: var(--cyan);
-      transform: translateY(-12px) scale(1.12);
-      text-shadow: 0 0 18px rgba(61, 231, 255, 0.85);
-    }
-
-    .lead {
-      margin: 1.15rem 0 1.7rem;
+    .room-meta {
+      min-height: 3.4rem;
       color: var(--muted);
-      font-size: clamp(1rem, 2.2vw, 1.15rem);
-      animation: rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both;
-      transition: color 0.18s ease, text-shadow 0.18s ease;
+      font-size: 0.95rem;
     }
 
-    .lead:hover {
-      color: var(--text);
-      text-shadow: 0 0 14px rgba(61, 231, 255, 0.35);
+    .room-meta strong { color: var(--ink); }
+
+    .plan-frame object, .plan-frame img { width: 100%; height: auto; }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.1rem;
     }
 
-    .cta {
-      appearance: none;
-      border: 1px solid rgba(61, 231, 255, 0.55);
-      background: rgba(61, 231, 255, 0.1);
-      color: var(--text);
-      font: inherit;
-      font-weight: 600;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      padding: 0.9rem 1.45rem;
+    .gallery figure { margin: 0; overflow: hidden; }
+    .gallery img { width: 100%; height: 280px; object-fit: cover; }
+    .gallery.wide img { height: 360px; }
+    .gallery figcaption, .media-card figcaption {
+      padding: 0.85rem 1rem 1rem;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+    .gallery figcaption strong, .media-card figcaption strong {
+      display: block;
+      color: var(--ink);
+      margin-bottom: 0.15rem;
+    }
+
+    .media-card { margin: 0; overflow: hidden; }
+    .media-card img { width: 100%; height: auto; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+    th, td { padding: 0.7rem 0.8rem; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; font-size: 0.82rem; letter-spacing: 0.04em; }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 1.2rem;
+    }
+
+    .palette { padding: 1.2rem; }
+    .swatches { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.7rem; margin-top: 0.8rem; }
+    .swatch { min-height: 86px; border: 1px solid var(--line); padding: 0.55rem; display: flex; align-items: end; font-size: 0.78rem; }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.8rem; }
+    .chip {
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 0.28rem 0.6rem;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .note { color: var(--muted); font-size: 0.92rem; }
+
+    footer {
+      padding: 2rem 0 2.6rem;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    dialog {
+      border: 1px solid var(--line);
+      background: var(--card);
+      padding: 0;
+      max-width: min(1100px, 94vw);
+    }
+    dialog::backdrop { background: rgba(20, 16, 12, 0.62); }
+    dialog img { max-height: 86vh; width: auto; margin: 0 auto; }
+    dialog button {
+      position: absolute;
+      top: 0.6rem;
+      right: 0.6rem;
+      border: 0;
+      background: var(--ink);
+      color: #fff;
+      width: 2rem;
+      height: 2rem;
       border-radius: 999px;
       cursor: pointer;
-      box-shadow: 0 0 20px rgba(61, 231, 255, 0.16);
-      animation: rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
-      transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
     }
 
-    .cta:hover,
-    .cta:focus-visible {
-      transform: translateY(-3px) scale(1.05);
-      border-color: var(--magenta);
-      background: rgba(255, 74, 216, 0.16);
-      box-shadow: 0 0 28px rgba(255, 74, 216, 0.35);
-      outline: none;
+    @media (max-width: 860px) {
+      .stats, .gallery, .split, .swatches { grid-template-columns: 1fr 1fr; }
+      .gallery img, .gallery.wide img { height: 210px; }
+      nav { display: none; }
     }
 
-    .ring {
-      position: fixed;
-      width: 18px;
-      height: 18px;
-      border: 2px solid var(--cyan);
-      border-radius: 50%;
-      transform: translate(-50%, -50%) scale(0.4);
-      opacity: 0;
-      z-index: 4;
+    @media (max-width: 560px) {
+      .stats, .gallery, .split, .swatches { grid-template-columns: 1fr; }
     }
 
-    .ring.on {
-      animation: shock 620ms ease-out forwards;
-    }
-
-    .cursor-glow {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 160px;
-      height: 160px;
-      margin: -80px 0 0 -80px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(61, 231, 255, 0.3), transparent 68%);
-      z-index: 5;
-      will-change: transform;
-    }
-
-    .cursor-glow.hot {
-      background: radial-gradient(circle, rgba(255, 74, 216, 0.36), rgba(61, 231, 255, 0.16) 46%, transparent 70%);
-    }
-
-    .cursor-dot {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 8px;
-      height: 8px;
-      margin: -4px 0 0 -4px;
-      border-radius: 50%;
-      background: var(--cyan);
-      z-index: 5;
-      will-change: transform;
-    }
-
-    .cursor-dot:nth-child(odd) {
-      background: var(--magenta);
-    }
-
-    @keyframes drift-a {
-      from { transform: translate3d(0, 0, 0); }
-      to { transform: translate3d(4vw, 3vh, 0); }
-    }
-
-    @keyframes drift-b {
-      from { transform: translate3d(0, 0, 0); }
-      to { transform: translate3d(-5vw, -2vh, 0); }
-    }
-
-    @keyframes rush {
-      from { transform: rotateX(66deg) translate3d(0, 0, 0); }
-      to { transform: rotateX(66deg) translate3d(0, 64px, 0); }
-    }
-
-    @keyframes rise {
-      from {
-        opacity: 0;
-        transform: translate3d(0, 16px, 0);
-      }
-      to {
-        opacity: 1;
-        transform: translate3d(0, 0, 0);
-      }
-    }
-
-    @keyframes shock {
-      to {
-        transform: translate(-50%, -50%) scale(14);
-        opacity: 0;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .aurora,
-      .floor,
-      .title,
-      .lead,
-      .cta,
-      .ring {
-        animation: none !important;
-      }
-
-      .cursor-glow,
-      .cursor-dot {
-        display: none;
-      }
-
-      .title span:hover,
-      .cta:hover {
-        transform: none;
-      }
+    @media print {
+      header.site, dialog { display: none !important; }
+      body { background: #fff; }
+      section { break-inside: avoid; }
     }
   </style>
 </head>
 <body>
-  <div class="aurora aurora-a" aria-hidden="true"></div>
-  <div class="aurora aurora-b" aria-hidden="true"></div>
-  <div class="sun" aria-hidden="true"></div>
-  <div class="floor-wrap" aria-hidden="true"><div class="floor"></div></div>
-  <canvas id="fx" aria-hidden="true"></canvas>
-  <div class="ring" id="ring" aria-hidden="true"></div>
-  <div class="cursor-glow" id="glow" aria-hidden="true"></div>
-  <div id="trail" aria-hidden="true"></div>
-  <div class="hud">
-    <span>NEON / SIGNAL</span>
-    <span id="clock">00:00:00</span>
-  </div>
-  <main>
-    <div class="stage" id="stage">
-      <h1 class="title" id="title" data-text="Hello World" aria-label="Hello World"></h1>
-      <p class="lead">移动、悬停、点击任意位置，频道都会回应。</p>
-      <button class="cta" id="burst" type="button">释放脉冲</button>
+  <header class="site">
+    <div class="wrap">
+      <a class="brand" href="#top">Studio 150</a>
+      <nav aria-label="页面章节">
+        <a href="#concept">概念</a>
+        <a href="#plan">平面</a>
+        <a href="#areas">面积</a>
+        <a href="#rooms">效果</a>
+        <a href="#materials">材料</a>
+        <a href="#lighting">灯光</a>
+        <a href="#ff-e">家具</a>
+        <a href="#budget">造价</a>
+      </nav>
     </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="wrap">
+        <p class="kicker">Interior Design Set · 2026</p>
+        <h1>150 平米四室两厅<br />现代轻奢原木方案</h1>
+        <p class="lead">南向 15.00m × 10.00m 套内 150㎡。客餐厨西侧集中，卧室东侧静区，主卧东南套房带衣帽间与主卫。全屋白橡木地板、奶油灰泥墙、香槟铜五金。</p>
+        <div class="stats">
+          <div class="stat"><b>150㎡</b><span>套内面积</span></div>
+          <div class="stat"><b>4 室</b><span>主卧 + 次卧 A/B + 书房</span></div>
+          <div class="stat"><b>2 厅 2 卫</b><span>客餐开放 · 主客卫分离</span></div>
+          <div class="stat"><b>2700K</b><span>全屋暖光无主灯</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="concept">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="kicker">01 / Concept</p>
+          <h2>设计说明</h2>
+          <p>按四口之家（夫妻 + 一孩 + 长辈偶尔同住）来排：南向会客、北向服务、东侧就寝。动线短，公私分区清楚。</p>
+        </div>
+        <div class="split">
+          <div>
+            <h3>三条原则</h3>
+            <p>南向留给客厅、南阳台和主卧，白天少开灯。北向安排厨房、生活阳台、玄关和书房，服务与工作不抢南光。</p>
+            <p>客餐厨打通，岛台/餐桌承接西侧动线；东侧房间全部从走廊进，避免穿过客厅才能进卧室。</p>
+            <p>材料克制：白橡、奶油灰泥、暖纹石材、亚麻、香槟铜。颜色少，纹理多，耐看十年。</p>
+          </div>
+          <aside class="palette">
+            <h3>适用前提</h3>
+            <p class="note">按常见高层南向板楼写的标准套型，不是某个具体楼盘的实测墙。承重墙、烟道、管井要以现场图纸为准，本图给家具与硬装定位。</p>
+            <div class="chips">
+              <span class="chip">层高按 2.9m 净高 2.7m</span>
+              <span class="chip">入户北侧</span>
+              <span class="chip">东南角主卧</span>
+              <span class="chip">可改三房+大书房</span>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section id="plan">
+      <div class="wrap">
+        <div class="plan-tools">
+          <div class="section-head" style="margin:0">
+            <p class="kicker">02 / Plan</p>
+            <h2>平面布置图</h2>
+            <p class="room-meta" id="roomMeta">点选房间查看面积与功能。外框 15.00m × 10.00m，北向上，比例 1:50。</p>
+          </div>
+        </div>
+        <div class="plan-frame">
+          <object id="floorplan" data="assets/plans/floorplan.svg" type="image/svg+xml" aria-label="150平米平面布置图">
+            <img src="assets/plans/floorplan.svg" alt="150平米平面布置图" />
+          </object>
+        </div>
+        <p class="note">施工放样以毫米标注为准：面宽 15000，进深 10000。门垛、梁下、空调位需现场复核。</p>
+        <figure class="media-card" style="margin-top:1.2rem">
+          <img src="assets/renders/floor-plan-150sqm.png" alt="150平米家具布置示意平面" />
+          <figcaption><strong>家具布置示意</strong>效果向平面，房间名称仅供阅读。尺寸与面积以上方 1:50 矢量图为准。</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="areas">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="kicker">03 / Areas</p>
+          <h2>房间面积表</h2>
+          <p>下列面积按轴线内净面积统计，合计 150.00㎡，与平面图一致。</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>房间</th><th>尺寸</th><th>面积</th><th>朝向 / 功能</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>客厅</td><td>7.20 × 2.80</td><td>20.16㎡</td><td>南向会客，接南阳台</td></tr>
+              <tr><td>南阳台</td><td>7.20 × 1.40</td><td>10.08㎡</td><td>休闲种植，落地窗</td></tr>
+              <tr><td>餐厅</td><td>3.60 × 3.00</td><td>10.80㎡</td><td>六人餐桌，西侧</td></tr>
+              <tr><td>厨房</td><td>3.60 × 2.80</td><td>10.08㎡</td><td>北向 U 型 + 操作台</td></tr>
+              <tr><td>生活阳台</td><td>1.80 × 2.80</td><td>5.04㎡</td><td>洗衣晾晒、水槽</td></tr>
+              <tr><td>玄关</td><td>1.80 × 2.80</td><td>5.04㎡</td><td>北向入户、整墙鞋柜</td></tr>
+              <tr><td>走廊储物</td><td>3.60 × 3.00</td><td>10.80㎡</td><td>通长柜、家庭中枢</td></tr>
+              <tr><td>主卧</td><td>5.40 × 4.20</td><td>22.68㎡</td><td>东南套房</td></tr>
+              <tr><td>衣帽间</td><td>2.40 × 3.00</td><td>7.20㎡</td><td>主卧北侧步入</td></tr>
+              <tr><td>主卫</td><td>2.40 × 4.20</td><td>10.08㎡</td><td>淋浴 + 浴缸 + 双台盆</td></tr>
+              <tr><td>次卧 A</td><td>3.00 × 3.00</td><td>9.00㎡</td><td>东向儿童房</td></tr>
+              <tr><td>次卧 B</td><td>3.00 × 2.80</td><td>8.40㎡</td><td>北向客房 / 次卧</td></tr>
+              <tr><td>书房</td><td>4.80 × 2.80</td><td>13.44㎡</td><td>北向办公，可改客房</td></tr>
+              <tr><td>客卫</td><td>2.40 × 3.00</td><td>7.20㎡</td><td>中部公共卫生间</td></tr>
+              <tr><td><strong>合计</strong></td><td>15.00 × 10.00</td><td><strong>150.00㎡</strong></td><td>套内</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="rooms">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="kicker">04 / Rooms</p>
+          <h2>空间效果图</h2>
+          <p>同一套材料语言贯穿全屋。点击图片可放大。</p>
+        </div>
+        <div class="gallery wide">
+          <figure>
+            <img src="assets/renders/living-room.png" alt="客厅效果图：白橡木地板、奶油沙发、南向落地窗" />
+            <figcaption><strong>客厅</strong>南向落地窗 + L 型亚麻沙发 + 橡木电视墙。进深 2.80m，家具靠墙留 1.2m 走道。</figcaption>
+          </figure>
+          <figure>
+            <img src="assets/renders/dining-kitchen.png" alt="餐厅与开放厨房效果图" />
+            <figcaption><strong>餐厅 / 厨房</strong>六人椭圆餐桌对布艺吊灯；厨房暖纹石岛台与 U 型橡木柜。</figcaption>
+          </figure>
+        </div>
+        <div class="gallery" style="margin-top:1.1rem">
+          <figure>
+            <img src="assets/renders/foyer.png" alt="玄关效果图" />
+            <figcaption><strong>玄关</strong>长虹橡木鞋柜、石凳、拱形铜框镜，入户先收纳再进厅。</figcaption>
+          </figure>
+          <figure>
+            <img src="assets/renders/master-bedroom.png" alt="主卧效果图" />
+            <figcaption><strong>主卧</strong>1.8m 橡木矮床，床头灯带，南窗纱帘。北侧进衣帽间与主卫。</figcaption>
+          </figure>
+          <figure>
+            <img src="assets/renders/master-bath.png" alt="主卫效果图" />
+            <figcaption><strong>主卫</strong>双台盆、独立淋浴、石造浴缸。干湿分区，暖色石材。</figcaption>
+          </figure>
+          <figure>
+            <img src="assets/renders/study.png" alt="书房效果图" />
+            <figcaption><strong>书房</strong>4.80m 面宽北窗，整墙书柜。需要第三间标准卧室时可改隔墙。</figcaption>
+          </figure>
+          <figure>
+            <img src="assets/renders/kids-bedroom.png" alt="儿童房效果图" />
+            <figcaption><strong>次卧 A</strong>东向儿童房：床 + 窗下书桌柜，sage 软装，避免卡通硬装。</figcaption>
+          </figure>
+          <figure>
+            <img src="assets/renders/mood-board.png" alt="材料色板" />
+            <figcaption><strong>材料色板</strong>白橡、灰泥、大理石、毛呢、皮革、亚麻、黄铜、陶砖。</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section id="materials">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="kicker">05 / Materials</p>
+          <h2>材料与做法</h2>
+        </div>
+        <div class="split">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>部位</th><th>做法</th></tr></thead>
+              <tbody>
+                <tr><td>地面</td><td>15mm 人字铺白橡；厨卫与生活阳台 600×600 暖灰防滑砖，门口石材过渡条</td></tr>
+                <tr><td>墙面</td><td>乳胶漆底 + 局部灰泥；电视墙、床头、玄关做 18mm 橡木饰面格栅</td></tr>
+                <tr><td>天花</td><td>无主灯吊顶，客厅跌级 120mm 藏灯带与空调；卫生间铝扣板或防水石膏板</td></tr>
+                <tr><td>厨房</td><td>暖纹石英石台面 20mm，柜体橡木皮 + 岩板背板，水槽区壁龛</td></tr>
+                <tr><td>卫浴</td><td>通体砖到顶，铜质龙头，埋墙箱体，同层排水前提要结构确认</td></tr>
+                <tr><td>门窗</td><td>室内 2.4m 高木饰面平开门；阳台断桥铝 + 低透纱帘</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="palette">
+            <h3>色板</h3>
+            <div class="swatches">
+              <div class="swatch" style="background:#e7d3a8">白橡</div>
+              <div class="swatch" style="background:#efe7d8">奶油灰泥</div>
+              <div class="swatch" style="background:#d8cfc3">暖石材</div>
+              <div class="swatch" style="background:#c9b59a">亚麻</div>
+              <div class="swatch" style="background:#b08968">驼皮</div>
+              <div class="swatch" style="background:#8a9a7b;color:#fff">鼠尾草</div>
+              <div class="swatch" style="background:#c4a35a">香槟铜</div>
+              <div class="swatch" style="background:#2a241c;color:#f6f1e8">深木线</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="lighting">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="kicker">06 / Lighting</p>
+          <h2>灯具布置图</h2>
+          <p>全屋 2700–3000K，显色 Ra≥90。客厅磁吸轨道，餐厅一盏吊灯，柜底/床头/镜前用灯带。</p>
+        </div>
+        <div class="plan-frame">
+          <img src="assets/plans/lighting.svg" alt="150平米灯具布置图" />
+        </div>
+      </div>
+    </section>
+
+    <section id="ff-e">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="kicker">07 / Furniture</p>
+          <h2>家具尺寸清单</h2>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>空间</th><th>家具</th><th>建议尺寸 (mm)</th></tr></thead>
+            <tbody>
+              <tr><td>客厅</td><td>L 型沙发 + 茶几 + 电视柜</td><td>沙发 2700×850 / 转 2100；茶几 1150×700；电视柜 400 深</td></tr>
+              <tr><td>餐厅</td><td>六人餐桌 + 餐椅</td><td>桌 2200×1200；走道两侧各 ≥800</td></tr>
+              <tr><td>厨房</td><td>U 型柜 + 操作台</td><td>台面深 600；中部走道 ≥900</td></tr>
+              <tr><td>主卧</td><td>1.8m 床 + 床头柜</td><td>床 1800×2000；两侧各留 500</td></tr>
+              <tr><td>衣帽间</td><td>通长挂衣 + 中岛可选</td><td>挂区深 600；中间走道 ≥800</td></tr>
+              <tr><td>次卧 A/B</td><td>1.5m 床 + 书桌柜</td><td>床 1500×2000；书桌 1400×600</td></tr>
+              <tr><td>书房</td><td>书桌 + 整墙书格</td><td>桌 1600×700；书格深 350–400</td></tr>
+              <tr><td>玄关</td><td>通顶鞋柜 + 换鞋凳</td><td>柜深 400；凳 350 深</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="budget">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="kicker">08 / Budget</p>
+          <h2>造价区间（2026，国内二线）</h2>
+          <p>按下表中位值合计约 86 万，不含家电与艺术品。一线城市上浮 15–25%。</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>分项</th><th>说明</th><th>区间</th></tr></thead>
+            <tbody>
+              <tr><td>硬装</td><td>拆改、水电、泥木、漆、吊顶、厨卫</td><td>38–58 万</td></tr>
+              <tr><td>定制柜</td><td>厨柜、鞋柜、衣柜、书柜、电视墙</td><td>10–16 万</td></tr>
+              <tr><td>木地板 / 石材</td><td>白橡人字铺 + 台面石</td><td>6–9 万</td></tr>
+              <tr><td>家具软装</td><td>沙发、床、餐桌、灯具、窗帘</td><td>12–20 万</td></tr>
+              <tr><td>卫浴五金</td><td>主客卫洁具、龙头、淋浴</td><td>3–5 万</td></tr>
+              <tr><td>设计监理</td><td>深化图纸 + 巡检</td><td>2–4 万</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
   </main>
+
+  <footer>
+    <div class="wrap">
+      本套图纸用于方案阶段沟通，不能替代施工图审查。若你有实际户型墙体图，可以按同一材料语言重排家具。
+    </div>
+  </footer>
+
+  <dialog id="lightbox" aria-label="放大效果图">
+    <button type="button" aria-label="关闭">×</button>
+    <img alt="" />
+  </dialog>
+
   <script>
-    const canvas = document.getElementById("fx");
-    const ctx = canvas.getContext("2d", { alpha: true, desynchronized: true });
-    const stage = document.getElementById("stage");
-    const title = document.getElementById("title");
-    const glow = document.getElementById("glow");
-    const trailRoot = document.getElementById("trail");
-    const ring = document.getElementById("ring");
-    const clock = document.getElementById("clock");
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const rooms = {
+      living: "客厅 20.16㎡ · 南向会客，L 沙发与电视墙分列东西。",
+      "south-balcony": "南阳台 10.08㎡ · 休闲种植，建议隐排水与地暖分路。",
+      dining: "餐厅 10.80㎡ · 六人桌，西侧靠厨房传菜最短。",
+      kitchen: "厨房 10.08㎡ · 北向 U 型，油烟经生活阳台排出。",
+      "service-balcony": "生活阳台 5.04㎡ · 洗衣、水槽、晾晒，地漏单独回路。",
+      foyer: "玄关 5.04㎡ · 北向入户，整墙暗藏鞋柜。",
+      hall: "走廊储物 10.80㎡ · 家庭中枢与通长柜，通往东侧卧室。",
+      master: "主卧 22.68㎡ · 东南套房，1.8m 床，北侧进衣帽间。",
+      wic: "衣帽间 7.20㎡ · 步入式，挂区深 600。",
+      "master-bath": "主卫 10.08㎡ · 淋浴、浴缸、双台盆，干湿分区。",
+      "bedroom-a": "次卧 A 9.00㎡ · 东向儿童房，窗下书桌。",
+      "bedroom-b": "次卧 B 8.40㎡ · 北向客房，1.5m 床。",
+      study: "书房 13.44㎡ · 北向办公，面宽足够改第三间卧室。",
+      "guest-bath": "客卫 7.20㎡ · 中部公共卫生间，兼顾家政洗手。"
+    };
 
-    title.replaceChildren(
-      ..."Hello World".split("").map((char) => {
-        const span = document.createElement("span");
-        if (char === " ") {
-          span.className = "is-space";
-          span.innerHTML = "&nbsp;";
-        } else {
-          span.textContent = char;
-        }
-        return span;
-      })
-    );
+    const meta = document.getElementById("roomMeta");
+    const objectEl = document.getElementById("floorplan");
 
-    const TRAIL = 6;
-    const trail = [];
-    for (let i = 0; i < TRAIL; i += 1) {
-      const el = document.createElement("div");
-      el.className = "cursor-dot";
-      trailRoot.appendChild(el);
-      trail.push({ el, x: innerWidth / 2, y: innerHeight / 2 });
+    function bindPlan() {
+      const doc = objectEl.contentDocument;
+      if (!doc) return;
+      doc.querySelectorAll(".room").forEach((el) => {
+        el.style.cursor = "pointer";
+        el.addEventListener("mouseenter", () => {
+          el.setAttribute("stroke", "#8b6914");
+          el.setAttribute("stroke-width", "4");
+          meta.innerHTML = rooms[el.dataset.room] || "平面布置图";
+        });
+        el.addEventListener("mouseleave", () => {
+          el.setAttribute("stroke", "#2a241c");
+          el.setAttribute("stroke-width", "2.2");
+        });
+        el.addEventListener("click", () => {
+          meta.innerHTML = "<strong>当前：</strong>" + (rooms[el.dataset.room] || "");
+        });
+      });
     }
 
-    const MAX = 64;
-    const CYAN = "rgba(61, 231, 255, 0.9)";
-    const MAGENTA = "rgba(255, 74, 216, 0.9)";
-    const particles = new Array(MAX);
-    const mouse = { x: innerWidth / 2, y: innerHeight / 2 };
-    let width = 0;
-    let height = 0;
-    let stars = null;
-    let running = !reduceMotion;
-    let glowX = mouse.x;
-    let glowY = mouse.y;
-    let px = 0;
-    let py = 0;
-    let parallaxDirty = false;
-    let lastTrailSpawn = 0;
+    objectEl.addEventListener("load", bindPlan);
+    if (objectEl.contentDocument && objectEl.contentDocument.readyState === "complete") bindPlan();
 
-    function makeParticle() {
-      return { x: 0, y: 0, vx: 0, vy: 0, life: 0, max: 0, cyan: true, size: 2 };
-    }
-
-    for (let i = 0; i < MAX; i += 1) particles[i] = makeParticle();
-
-    function grab() {
-      for (let i = 0; i < MAX; i += 1) {
-        if (particles[i].life <= 0) return particles[i];
-      }
-      return null;
-    }
-
-    function spawn(x, y, count, explode) {
-      for (let i = 0; i < count; i += 1) {
-        const p = grab();
-        if (!p) return;
-        const angle = Math.random() * Math.PI * 2;
-        const speed = explode ? 1.6 + Math.random() * 3.4 : 0.12 + Math.random() * 0.35;
-        p.x = explode ? x : Math.random() * width;
-        p.y = explode ? y : Math.random() * height;
-        p.vx = Math.cos(angle) * speed;
-        p.vy = Math.sin(angle) * speed;
-        p.max = explode ? 36 + (i % 10) : 180;
-        p.life = p.max;
-        p.cyan = i % 2 === 0;
-        p.size = explode ? 3 : 2;
-      }
-    }
-
-    function spawnTrail(x, y) {
-      const p = grab();
-      if (!p) return;
-      p.x = x;
-      p.y = y;
-      p.vx = (Math.random() - 0.5) * 0.4;
-      p.vy = (Math.random() - 0.5) * 0.4;
-      p.max = 18;
-      p.life = 18;
-      p.cyan = Math.random() > 0.5;
-      p.size = 2;
-    }
-
-    function buildStars() {
-      stars = document.createElement("canvas");
-      stars.width = width;
-      stars.height = height;
-      const sctx = stars.getContext("2d");
-      const count = Math.min(110, Math.floor(width * height / 14000));
-      for (let i = 0; i < count; i += 1) {
-        sctx.fillStyle = i % 5 === 0 ? "rgba(255, 74, 216, 0.7)" : "rgba(230, 248, 255, 0.7)";
-        sctx.fillRect((Math.random() * width) | 0, (Math.random() * height) | 0, 1, 1);
-      }
-    }
-
-    function resize() {
-      width = canvas.width = innerWidth;
-      height = canvas.height = innerHeight;
-      canvas.style.width = innerWidth + "px";
-      canvas.style.height = innerHeight + "px";
-      buildStars();
-    }
-
-    function tick(now) {
-      if (!running) return;
-      glowX += (mouse.x - glowX) * 0.28;
-      glowY += (mouse.y - glowY) * 0.28;
-      glow.style.transform = "translate3d(" + glowX + "px," + glowY + "px,0)";
-
-      let tx = glowX;
-      let ty = glowY;
-      for (let i = 0; i < TRAIL; i += 1) {
-        const dot = trail[i];
-        dot.x += (tx - dot.x) * (0.34 - i * 0.03);
-        dot.y += (ty - dot.y) * (0.34 - i * 0.03);
-        const scale = 1 - i * 0.12;
-        dot.el.style.transform = "translate3d(" + dot.x + "px," + dot.y + "px,0) scale(" + scale + ")";
-        dot.el.style.opacity = String(0.7 - i * 0.09);
-        tx = dot.x;
-        ty = dot.y;
-      }
-
-      if (parallaxDirty) {
-        stage.style.setProperty("--px", px);
-        stage.style.setProperty("--py", py);
-        parallaxDirty = false;
-      }
-
-      ctx.clearRect(0, 0, width, height);
-      if (stars) ctx.drawImage(stars, 0, 0);
-
-      for (let i = 0; i < MAX; i += 1) {
-        const p = particles[i];
-        if (p.life <= 0) continue;
-        p.x += p.vx + (mouse.x - p.x) * 0.0008;
-        p.y += p.vy + (mouse.y - p.y) * 0.0008;
-        p.life -= 1;
-      }
-
-      ctx.fillStyle = CYAN;
-      for (let i = 0; i < MAX; i += 1) {
-        const p = particles[i];
-        if (p.life <= 0 || !p.cyan) continue;
-        ctx.globalAlpha = p.life / p.max;
-        ctx.fillRect(p.x, p.y, p.size, p.size);
-      }
-      ctx.fillStyle = MAGENTA;
-      for (let i = 0; i < MAX; i += 1) {
-        const p = particles[i];
-        if (p.life <= 0 || p.cyan) continue;
-        ctx.globalAlpha = p.life / p.max;
-        ctx.fillRect(p.x, p.y, p.size, p.size);
-      }
-      ctx.globalAlpha = 1;
-      requestAnimationFrame(tick);
-    }
-
-    function pulse(x, y) {
-      ring.style.left = x + "px";
-      ring.style.top = y + "px";
-      ring.classList.remove("on");
-      void ring.offsetWidth;
-      ring.classList.add("on");
-      if (!reduceMotion) spawn(x, y, 20, true);
-    }
-
-    function isHotTarget(node) {
-      return Boolean(node && node.closest && node.closest(".title, .cta, .lead, .hud"));
-    }
-
-    window.addEventListener("resize", resize, { passive: true });
-    window.addEventListener("pointermove", (event) => {
-      mouse.x = event.clientX;
-      mouse.y = event.clientY;
-      px = (event.clientX / innerWidth - 0.5).toFixed(3);
-      py = (event.clientY / innerHeight - 0.5).toFixed(3);
-      parallaxDirty = true;
-      glow.classList.toggle("hot", isHotTarget(event.target));
-      const now = performance.now();
-      if (!reduceMotion && now - lastTrailSpawn > 32) {
-        spawnTrail(event.clientX, event.clientY);
-        lastTrailSpawn = now;
-      }
-    }, { passive: true });
-    window.addEventListener("pointerdown", (event) => {
-      if (event.button !== 0) return;
-      pulse(event.clientX, event.clientY);
+    const lightbox = document.getElementById("lightbox");
+    const lightImg = lightbox.querySelector("img");
+    document.querySelectorAll(".gallery img").forEach((img) => {
+      img.style.cursor = "zoom-in";
+      img.addEventListener("click", () => {
+        lightImg.src = img.src;
+        lightImg.alt = img.alt;
+        lightbox.showModal();
+      });
     });
-    document.addEventListener("selectstart", (event) => event.preventDefault());
-    document.addEventListener("dblclick", (event) => event.preventDefault());
-    document.addEventListener("visibilitychange", () => {
-      const shouldRun = !document.hidden && !reduceMotion;
-      if (shouldRun && !running) {
-        running = true;
-        requestAnimationFrame(tick);
-      } else if (document.hidden) {
-        running = false;
-      }
+    lightbox.querySelector("button").addEventListener("click", () => lightbox.close());
+    lightbox.addEventListener("click", (event) => {
+      if (event.target === lightbox) lightbox.close();
     });
-
-    function updateClock() {
-      clock.textContent = new Date().toLocaleTimeString("zh-CN", { hour12: false });
-    }
-
-    resize();
-    updateClock();
-    setInterval(updateClock, 1000);
-    if (!reduceMotion) {
-      spawn(width / 2, height / 2, 36, false);
-      requestAnimationFrame(tick);
-    } else if (stars) {
-      ctx.drawImage(stars, 0, 0);
-    }
   </script>
 </body>
 </html>
