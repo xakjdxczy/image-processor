@@ -190,6 +190,30 @@
 
     .note { color: var(--muted); font-size: 0.92rem; }
 
+    .dollhouse-wrap { position: relative; }
+    .dollhouse {
+      height: min(72vh, 640px);
+      background: #ece6da;
+      overflow: hidden;
+    }
+    .dollhouse canvas { width: 100%; height: 100%; display: block; }
+    .dollhouse-ui {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      padding: 0.7rem 0.8rem 0;
+    }
+    .dollhouse-ui button {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 0.85rem;
+      padding: 0.35rem 0.7rem;
+      cursor: pointer;
+    }
+    .dollhouse-ui button:hover { border-color: var(--gold); color: var(--gold); }
+
     footer {
       padding: 2rem 0 2.6rem;
       color: var(--muted);
@@ -242,6 +266,7 @@
         <a href="/">官网</a>
         <a href="#concept">概念</a>
         <a href="#plan">平面</a>
+        <a href="#tour">3D看房</a>
         <a href="#areas">面积</a>
         <a href="#rooms">效果</a>
         <a href="#materials">材料</a>
@@ -317,10 +342,43 @@
       </div>
     </section>
 
+    <section id="tour">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="kicker">03 / 3D</p>
+          <h2>3D 看房</h2>
+          <p class="room-meta" id="tourMeta">拖动画布旋转，点房间看面积。去顶鸟瞰，和贝壳 3D 户型同一看房方式。</p>
+        </div>
+        <div class="plan-frame dollhouse-wrap">
+          <div class="dollhouse-ui">
+            <button type="button" data-view="se">东南鸟瞰</button>
+            <button type="button" data-view="sw">西南鸟瞰</button>
+            <button type="button" data-view="top">正俯视</button>
+          </div>
+          <div class="dollhouse" id="dollhouse" role="img" aria-label="可旋转的150平米3D户型"></div>
+        </div>
+        <p class="note">3D 户型按平面图尺寸生成，可旋转缩放。下面三张是同一套户型的写实去顶效果。</p>
+        <div class="gallery wide" style="margin-top:1.1rem">
+          <figure>
+            <img src="assets/renders/3d-dollhouse-se.png" alt="东南向去顶3D户型效果" />
+            <figcaption><strong>东南鸟瞰</strong>整套去顶，客餐厨、主卧套房和次卧一目了然。</figcaption>
+          </figure>
+          <figure>
+            <img src="assets/renders/3d-dollhouse-sw.png" alt="西南向去顶3D户型效果" />
+            <figcaption><strong>西南鸟瞰</strong>前景是南阳台和客厅，卧室在右侧。</figcaption>
+          </figure>
+        </div>
+        <figure class="media-card" style="margin-top:1.1rem">
+          <img src="assets/renders/3d-living-cutaway.png" alt="客餐厅厨房3D剖切效果" />
+          <figcaption><strong>客餐厨剖切</strong>开放厅的家具尺度和南向采光。</figcaption>
+        </figure>
+      </div>
+    </section>
+
     <section id="areas">
       <div class="wrap">
         <div class="section-head">
-          <p class="kicker">03 / Areas</p>
+          <p class="kicker">04 / Areas</p>
           <h2>房间面积表</h2>
           <p>下列面积按轴线内净面积统计，合计 150.00㎡，与平面图一致。</p>
         </div>
@@ -354,14 +412,14 @@
     <section id="rooms">
       <div class="wrap">
         <div class="section-head">
-          <p class="kicker">04 / Rooms</p>
+          <p class="kicker">05 / Rooms</p>
           <h2>空间效果图</h2>
           <p>同一套材料语言贯穿全屋。点击图片可放大。</p>
         </div>
         <div class="gallery wide">
           <figure>
             <img src="assets/renders/living-room.png" alt="客厅效果图：白橡木地板、奶油沙发、南向落地窗" />
-            <figcaption><strong>客厅</strong>南向落地窗 + L 型亚麻沙发 + 橡木电视墙。进深 2.80m，家具靠墙留 1.2m 走道。</figcaption>
+            <figcaption><strong>客厅</strong>南向落地窗 + L 型亚麻沙发 + 橡木电视墙。进深 3.80m，家具靠墙留走道。</figcaption>
           </figure>
           <figure>
             <img src="assets/renders/dining-kitchen.png" alt="餐厅与开放厨房效果图" />
@@ -400,7 +458,7 @@
     <section id="materials">
       <div class="wrap">
         <div class="section-head">
-          <p class="kicker">05 / Materials</p>
+          <p class="kicker">06 / Materials</p>
           <h2>材料与做法</h2>
         </div>
         <div class="split">
@@ -437,7 +495,7 @@
     <section id="lighting">
       <div class="wrap">
         <div class="section-head">
-          <p class="kicker">06 / Lighting</p>
+          <p class="kicker">07 / Lighting</p>
           <h2>灯具布置图</h2>
           <p>全屋 2700–3000K，显色 Ra≥90。客厅磁吸轨道，餐厅一盏吊灯，柜底/床头/镜前用灯带。</p>
         </div>
@@ -450,7 +508,7 @@
     <section id="ff-e">
       <div class="wrap">
         <div class="section-head">
-          <p class="kicker">07 / Furniture</p>
+          <p class="kicker">08 / Furniture</p>
           <h2>家具尺寸清单</h2>
         </div>
         <div class="table-wrap">
@@ -474,7 +532,7 @@
     <section id="budget">
       <div class="wrap">
         <div class="section-head">
-          <p class="kicker">08 / Budget</p>
+          <p class="kicker">09 / Budget</p>
           <h2>造价区间（2026，国内二线）</h2>
           <p>按下表中位值合计约 86 万，不含家电与艺术品。一线城市上浮 15–25%。</p>
         </div>
@@ -552,7 +610,7 @@
 
     const lightbox = document.getElementById("lightbox");
     const lightImg = lightbox.querySelector("img");
-    document.querySelectorAll(".gallery img").forEach((img) => {
+    document.querySelectorAll(".gallery img, #tour .media-card img").forEach((img) => {
       img.style.cursor = "zoom-in";
       img.addEventListener("click", () => {
         lightImg.src = img.src;
@@ -565,5 +623,13 @@
       if (event.target === lightbox) lightbox.close();
     });
   </script>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./assets/vendor/three/three.module.js"
+    }
+  }
+  </script>
+  <script type="module" src="assets/js/dollhouse.js"></script>
 </body>
 </html>
