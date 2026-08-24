@@ -209,9 +209,9 @@ export function buildInterior(THREE, scene, PLAN, ROOMS, renderer) {
         const wide = hole.b - hole.a >= 2.05;
         wallBox(horizontal, hole.a, hole.b, axis, wide ? WALL_H - 0.04 : DOOR_H + (WALL_H - DOOR_H) / 2, wide ? 0.08 : WALL_H - DOOR_H);
         if (!wide) {
-          const mid = (hole.a + hole.b) / 2;
-          const jamW = hole.b - hole.a;
-          box(horizontal ? jamW : 0.06, DOOR_H, horizontal ? 0.06 : jamW, mWood, horizontal ? mid : axis, DOOR_H / 2, horizontal ? axis : mid);
+          const jam = 0.06;
+          wallBox(horizontal, hole.a, hole.a + jam, axis, DOOR_H / 2, DOOR_H);
+          wallBox(horizontal, hole.b - jam, hole.b, axis, DOOR_H / 2, DOOR_H);
         }
       } else {
         const { sill, head } = hole.item;
