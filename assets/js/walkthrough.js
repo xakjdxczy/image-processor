@@ -374,21 +374,31 @@ canvas.addEventListener("pointermove", (event) => {
   travel += Math.hypot(dx, dy);
   lastX = event.clientX;
   lastY = event.clientY;
-  if (travel < 12) return;
+  if (travel < 18) return;
   looking = true;
   player.yaw -= dx * 0.0055;
   player.pitch = Math.max(-1.2, Math.min(1.2, player.pitch - dy * 0.0045));
 });
+function pointOnFloor(clientX, clientY) {
+  const rect = canvas.getBoundingClientRect();
+  pointer.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+  pointer.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  const hit = raycaster.intersectObjects(floors)[0];
+  if (hit) return { x: hit.point.x, z: hit.point.z };
+  if (Math.abs(raycaster.ray.direction.y) < 0.02) return null;
+  const t = -raycaster.ray.origin.y / raycaster.ray.direction.y;
+  if (t <= 0.05) return null;
+  const p = raycaster.ray.origin.clone().addScaledVector(raycaster.ray.direction, t);
+  return { x: p.x, z: p.z };
+}
+
 canvas.addEventListener("pointerup", (event) => {
   dragging = false;
   mount.classList.remove("is-dragging");
-  if (looking) return;
-  const rect = canvas.getBoundingClientRect();
-  pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-  pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-  raycaster.setFromCamera(pointer, camera);
-  const hit = raycaster.intersectObjects(floors)[0];
-  if (hit) goTo(hit.point.x, hit.point.z);
+  if (looking || travel > 16) return;
+  const dest = pointOnFloor(event.clientX, event.clientY);
+  if (dest) goTo(dest.x, dest.z);
 });
 
 function onKey(event, down) {
@@ -527,4 +537,6 @@ function tick(now) {
   renderer.render(scene, camera);
   requestAnimationFrame(tick);
 }
+
+window.__walk = { player, goTo, walkable, roomAt };
 requestAnimationFrame(tick);
