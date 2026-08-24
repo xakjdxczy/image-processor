@@ -1,5 +1,6 @@
 import * as THREE from "../vendor/three/three.module.js";
 import { ROOMS, PLAN } from "./plan-data.js";
+import { buildInterior } from "./interior.js";
 
 const EYE = 1.62;
 const SPEED = 3.6;
@@ -26,106 +27,39 @@ const OPENINGS = [
 ];
 
 const SPOTS = {
-  living: { x: 3.2, z: 7.2, yaw: 0.05 },
-  dining: { x: 2.5, z: 3.85, yaw: 0.05 },
-  kitchen: { x: 1.7, z: 1.55, yaw: 3.2 },
-  foyer: { x: 6.25, z: 1.55, yaw: 3.55 },
-  study: { x: 9.2, z: 1.45, yaw: 0.15 },
-  master: { x: 12.4, z: 7.9, yaw: 0.05 },
-  "bedroom-a": { x: 13.35, z: 4.25, yaw: 3.3 },
-  "bedroom-b": { x: 13.35, z: 1.4, yaw: 3.3 },
-  hall: { x: 6.3, z: 5.4, yaw: 0.1 },
+  living: { x: 3.55, z: 7.55, yaw: 1.05 },
+  dining: { x: 4.05, z: 4.15, yaw: 1.55 },
+  kitchen: { x: 2.35, z: 2.15, yaw: 0.15 },
+  foyer: { x: 6.35, z: 2.15, yaw: 0.05 },
+  study: { x: 9.55, z: 2.15, yaw: 0.12 },
+  master: { x: 11.15, z: 8.55, yaw: 0.35 },
+  "bedroom-a": { x: 13.35, z: 4.55, yaw: 0.2 },
+  "bedroom-b": { x: 13.15, z: 2.15, yaw: 2.5 },
+  hall: { x: 6.3, z: 5.4, yaw: 0.15 },
   "guest-bath": { x: 8.35, z: 4.25, yaw: 0.2 },
-  wic: { x: 10.75, z: 4.25, yaw: 0.2 },
-  "master-bath": { x: 8.35, z: 7.5, yaw: 0.15 },
+  wic: { x: 10.75, z: 4.25, yaw: 0.15 },
+  "master-bath": { x: 8.55, z: 7.15, yaw: 3.2 },
   "south-balcony": { x: 3.4, z: 9.2, yaw: 3.2 },
-  "service-balcony": { x: 4.4, z: 1.4, yaw: 1.6 }
-};
-
-const VIEWS = {
-  living: { pano: "assets/panos/pano-living.png", hero: "assets/renders/living-room.png" },
-  dining: { pano: "assets/panos/pano-dining.png", hero: "assets/renders/dining-kitchen.png" },
-  kitchen: { pano: "assets/panos/pano-dining.png", hero: "assets/renders/dining-kitchen.png" },
-  foyer: { pano: "assets/panos/pano-foyer.png", hero: "assets/renders/foyer.png" },
-  hall: { pano: "assets/panos/pano-foyer.png", hero: "assets/renders/foyer.png" },
-  study: { pano: "assets/panos/pano-study.png", hero: "assets/renders/study.png" },
-  master: { pano: "assets/panos/pano-master.png", hero: "assets/renders/master-bedroom.png" },
-  wic: { pano: "assets/panos/pano-master.png", hero: "assets/renders/master-bedroom.png" },
-  "master-bath": { pano: "assets/panos/pano-bath.png", hero: "assets/renders/master-bath.png" },
-  "guest-bath": { pano: "assets/panos/pano-bath.png", hero: "assets/renders/master-bath.png" },
-  "bedroom-a": { pano: "assets/panos/pano-kids.png", hero: "assets/renders/kids-bedroom.png" },
-  "bedroom-b": { pano: "assets/panos/pano-kids.png", hero: "assets/renders/kids-bedroom.png" },
-  "south-balcony": { pano: "assets/panos/pano-living.png", hero: "assets/renders/living-room.png" },
-  "service-balcony": { pano: "assets/panos/pano-dining.png", hero: "assets/renders/dining-kitchen.png" }
+  "service-balcony": { x: 4.45, z: 1.55, yaw: 0.2 }
 };
 
 const mount = document.getElementById("walkthrough");
 const meta = document.getElementById("tourMeta");
 if (!mount) throw new Error("missing #walkthrough");
 
-const loader = new THREE.TextureLoader();
-const texCache = new Map();
-
-function loadMap(src, wrap) {
-  if (texCache.has(src)) return texCache.get(src);
-  const map = loader.load(src, () => {
-    map.needsUpdate = true;
-  });
-  map.colorSpace = THREE.SRGBColorSpace;
-  map.anisotropy = 8;
-  map.minFilter = THREE.LinearFilter;
-  map.generateMipmaps = false;
-  map.wrapS = map.wrapT = wrap;
-  texCache.set(src, map);
-  return map;
-}
-
-Object.values(VIEWS).forEach((view) => {
-  loadMap(view.pano, THREE.RepeatWrapping);
-  loadMap(view.hero, THREE.ClampToEdgeWrapping);
-});
-
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x1a1611);
-const camera = new THREE.PerspectiveCamera(80, 1, 0.08, 80);
+const camera = new THREE.PerspectiveCamera(76, 1, 0.08, 50);
 camera.rotation.order = "YXZ";
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.12;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 mount.insertBefore(renderer.domElement, mount.firstChild);
 
-const sphereA = new THREE.Mesh(
-  new THREE.SphereGeometry(40, 72, 48),
-  new THREE.MeshBasicMaterial({ side: THREE.BackSide, toneMapped: false, transparent: true, opacity: 1 })
-);
-const sphereB = new THREE.Mesh(
-  new THREE.SphereGeometry(40, 72, 48),
-  new THREE.MeshBasicMaterial({ side: THREE.BackSide, toneMapped: false, transparent: true, opacity: 0 })
-);
-sphereA.renderOrder = -20;
-sphereB.renderOrder = -19;
-scene.add(sphereA, sphereB);
-let frontSphere = sphereA;
-let backSphere = sphereB;
-let fading = 0;
-
-const hero = new THREE.Mesh(
-  new THREE.PlaneGeometry(1, 1),
-  new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, toneMapped: false, side: THREE.DoubleSide })
-);
-hero.renderOrder = 3;
-scene.add(hero);
-
-const floors = [];
-const floorMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
-ROOMS.forEach((room) => {
-  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(room.w, room.d), floorMat);
-  mesh.rotation.x = -Math.PI / 2;
-  mesh.position.set(room.x + room.w / 2, 0.01, room.y + room.d / 2);
-  mesh.userData.room = room;
-  scene.add(mesh);
-  floors.push(mesh);
-});
+const { floors } = buildInterior(THREE, scene, PLAN, ROOMS, renderer);
 
 const STEP = 0.1;
 const gw = Math.round(PLAN.width / STEP);
@@ -225,12 +159,10 @@ function findPath(sx, sz, tx, tz) {
   return pathPts.filter((_, i) => i === pathPts.length - 1 || i % 2 === 0);
 }
 
-const player = { x: 3.2, z: 7.2, yaw: 0.05, pitch: 0 };
+const player = { x: 3.55, z: 7.55, yaw: 1.05, pitch: -0.06 };
 const keys = {};
 const hold = { forward: false, back: false, left: false, right: false };
 let path = [];
-let shownSlug = "";
-let heading = 0.05;
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 let dragging = false;
@@ -238,34 +170,6 @@ let looking = false;
 let lastX = 0;
 let lastY = 0;
 let travel = 0;
-
-function viewOf(slug) {
-  return VIEWS[slug] || VIEWS.living;
-}
-
-function applyView(mesh, slug, yaw) {
-  const view = viewOf(slug);
-  mesh.material.map = loadMap(view.pano, THREE.RepeatWrapping);
-  mesh.material.needsUpdate = true;
-  mesh.userData.heading = yaw;
-}
-
-function showRoom(slug, yaw) {
-  if (slug === shownSlug) return;
-  heading = yaw;
-  hero.material.map = loadMap(viewOf(slug).hero, THREE.ClampToEdgeWrapping);
-  hero.material.needsUpdate = true;
-  if (!shownSlug) {
-    applyView(frontSphere, slug, yaw);
-    frontSphere.material.opacity = 1;
-    shownSlug = slug;
-    return;
-  }
-  applyView(backSphere, slug, yaw);
-  backSphere.material.opacity = 0;
-  fading = 0.001;
-  shownSlug = slug;
-}
 
 function setPose(x, z, yaw) {
   const spot = nearestWalkable(x, z) || { x, z };
@@ -287,7 +191,7 @@ function roomAt(x, z) {
 function setMeta() {
   if (!meta) return;
   const room = roomAt(player.x, player.z);
-  meta.innerHTML = "<strong>设计全景</strong>　" + (room ? room.name + "　" + room.area.toFixed(2) + "㎡　" : "") + "正面就是该房间效果图，拖动在三维里转头环视同一套场景。";
+  meta.innerHTML = "<strong>三维场景</strong>　" + (room ? room.name + "　" + room.area.toFixed(2) + "㎡　" : "") + "按效果图搭的整套三维户型。拖动转头，走进任意房间。";
 }
 
 function goTo(x, z) {
@@ -329,8 +233,8 @@ canvas.addEventListener("pointermove", (event) => {
   lastY = event.clientY;
   if (travel < 8) return;
   looking = true;
-  player.yaw -= dx * 0.0058;
-  player.pitch = Math.max(-1.2, Math.min(1.2, player.pitch - dy * 0.0046));
+  player.yaw -= dx * 0.0055;
+  player.pitch = Math.max(-1.15, Math.min(1.15, player.pitch - dy * 0.0045));
 });
 
 function pointOnFloor(clientX, clientY) {
@@ -385,7 +289,7 @@ function bindHold(el, action) {
     if (!short) return;
     if (action === "forward" || action === "back") {
       const dir = action === "back" ? -1 : 1;
-      goTo(player.x + -Math.sin(player.yaw) * 1.6 * dir, player.z + -Math.cos(player.yaw) * 1.6 * dir);
+      goTo(player.x - Math.sin(player.yaw) * 1.6 * dir, player.z - Math.cos(player.yaw) * 1.6 * dir);
     }
     if (action === "left" || action === "right") player.yaw += (action === "left" ? 1 : -1) * 0.45;
   };
@@ -399,9 +303,7 @@ document.querySelectorAll("[data-go]").forEach((btn) => bindHold(btn, btn.datase
 document.querySelectorAll("[data-spot]").forEach((btn) => {
   btn.addEventListener("click", () => {
     const spot = SPOTS[btn.dataset.spot];
-    if (!spot) return;
-    setPose(spot.x, spot.z, spot.yaw);
-    heading = spot.yaw;
+    if (spot) setPose(spot.x, spot.z, spot.yaw);
   });
 });
 
@@ -441,29 +343,6 @@ function drawMap() {
   mapCtx.stroke();
 }
 
-function placeVisuals() {
-  frontSphere.position.set(player.x, EYE, player.z);
-  backSphere.position.set(player.x, EYE, player.z);
-  const sphereYaw = heading + Math.PI;
-  frontSphere.rotation.y = sphereYaw;
-  backSphere.rotation.y = sphereYaw;
-  const dist = 5.1;
-  hero.position.set(player.x - Math.sin(heading) * dist, EYE, player.z - Math.cos(heading) * dist);
-  hero.lookAt(player.x, EYE, player.z);
-  const map = hero.material.map;
-  if (map && map.image && map.image.width) {
-    const aspect = map.image.width / Math.max(1, map.image.height);
-    const h = 2 * dist * Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.46));
-    hero.scale.set(h * aspect, h, 1);
-  }
-  let dyaw = player.yaw - heading;
-  while (dyaw > Math.PI) dyaw -= Math.PI * 2;
-  while (dyaw < -Math.PI) dyaw += Math.PI * 2;
-  const align = Math.max(0, Math.cos(dyaw) * Math.cos(player.pitch));
-  hero.material.opacity = Math.pow(align, 1.6);
-  hero.visible = hero.material.opacity > 0.03;
-}
-
 let last = performance.now();
 function tick(now) {
   const dt = Math.min(0.05, (now - last) / 1000);
@@ -473,7 +352,10 @@ function tick(now) {
   const forward = (keys.KeyW || keys.ArrowUp || keys.w || hold.forward ? 1 : 0) + (keys.KeyS || keys.ArrowDown || keys.s || hold.back ? -1 : 0);
   const strafe = (keys.KeyD || keys.ArrowRight || keys.d ? 1 : 0) + (keys.KeyA || keys.ArrowLeft || keys.a ? -1 : 0);
   if (forward || strafe) {
-    tryMove(player.x + (-Math.sin(player.yaw) * forward + Math.cos(player.yaw) * strafe) * SPEED * dt, player.z + (-Math.cos(player.yaw) * forward + Math.sin(player.yaw) * strafe) * SPEED * dt);
+    tryMove(
+      player.x + (-Math.sin(player.yaw) * forward + Math.cos(player.yaw) * strafe) * SPEED * dt,
+      player.z + (-Math.cos(player.yaw) * forward + Math.sin(player.yaw) * strafe) * SPEED * dt
+    );
   }
   if (path.length) {
     const next = path[0];
@@ -483,33 +365,14 @@ function tick(now) {
     if (dist < 0.12) path.shift();
     else tryMove(player.x + (dx / dist) * SPEED * dt, player.z + (dz / dist) * SPEED * dt);
   }
-  const room = roomAt(player.x, player.z);
-  const slug = room ? room.slug : "living";
-  const spot = SPOTS[slug] || SPOTS.living;
-  showRoom(slug, shownSlug === slug ? heading : spot.yaw);
-  if (fading) {
-    fading = Math.min(1, fading + dt * 2.2);
-    backSphere.material.opacity = fading;
-    frontSphere.material.opacity = 1 - fading * 0.8;
-    if (fading >= 1) {
-      const swap = frontSphere;
-      frontSphere = backSphere;
-      backSphere = swap;
-      frontSphere.material.opacity = 1;
-      backSphere.material.opacity = 0;
-      fading = 0;
-    }
-  }
   camera.position.set(player.x, EYE, player.z);
   camera.rotation.y = player.yaw;
   camera.rotation.x = player.pitch;
-  placeVisuals();
   setMeta();
   drawMap();
   renderer.render(scene, camera);
   requestAnimationFrame(tick);
 }
 
-showRoom("living", player.yaw);
 window.__walk = { player, goTo, walkable, roomAt };
 requestAnimationFrame(tick);

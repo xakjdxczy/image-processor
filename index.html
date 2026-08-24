@@ -408,11 +408,11 @@
         <div class="section-head">
           <p class="kicker">03 / 3D</p>
           <h2>3D 看房</h2>
-          <p class="room-meta" id="tourMeta">设计全景：正面就是该房间效果图，拖动在三维里转头环视同一套场景，点平面走到任意房间。</p>
+          <p class="room-meta" id="tourMeta">整套按效果图搭建的三维户型：奶油沙发、格栅电视墙、岩板厨房和主卧都在真实空间里。拖动转头有视差，点平面走到任意房间。</p>
         </div>
         <div class="plan-frame dollhouse-wrap">
           <div class="dollhouse-ui">
-            <button type="button" data-mode="walk" class="is-on">全景漫游</button>
+            <button type="button" data-mode="walk" class="is-on">三维漫游</button>
             <button type="button" data-mode="orbit">户型鸟瞰</button>
             <button type="button" data-spot="living">客厅</button>
             <button type="button" data-spot="dining">餐厅</button>
@@ -429,7 +429,7 @@
             <button type="button" data-view="sw">西南鸟瞰</button>
             <button type="button" data-view="top">正俯视</button>
           </div>
-          <div class="walk-stage" id="walkthrough" aria-label="150平米全景漫游">
+          <div class="walk-stage" id="walkthrough" aria-label="150平米三维漫游">
             <div class="walk-hud">
               <div class="walk-pad" aria-label="行走方向">
                 <button type="button" data-hold="forward">前进</button>
@@ -446,7 +446,7 @@
             </div>
           </div>
         </div>
-        <p class="note">每个房间的正面就是图册里的效果图，拖动是在这套场景的三维全景里转头，不是方块白模。户型鸟瞰仍是写实去顶图。</p>
+        <p class="note">这是按图册搭出来的整套三维场景，不是正面贴图，也不是白模方块。拖动转头会看到家具和墙体的进深。户型鸟瞰仍是写实去顶图。</p>
         <div class="gallery wide" style="margin-top:1.1rem">
           <figure>
             <img src="assets/renders/3d-dollhouse-se.png" alt="东南向去顶3D户型效果" />
@@ -734,7 +734,7 @@
     }
   }
   </script>
-  <script type="module" src="assets/js/walkthrough.js?v=design360"></script>
+  <script type="module" src="assets/js/walkthrough.js?v=designed3d"></script>
   <script src="assets/js/dollhouse.js?v=real3d" defer></script>
 </body>
 </html>
