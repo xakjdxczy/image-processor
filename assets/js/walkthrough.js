@@ -404,13 +404,30 @@ window.addEventListener("keydown", (event) => onKey(event, true));
 window.addEventListener("keyup", (event) => onKey(event, false));
 
 function bindHold(el, action) {
+  let t0 = 0;
+  let armed = false;
   const start = (event) => {
     event.preventDefault();
+    armed = true;
     hold[action] = true;
+    t0 = performance.now();
     if (action === "forward" || action === "back") path = [];
   };
   const stop = () => {
+    if (!armed) return;
+    const short = performance.now() - t0 < 280;
+    armed = false;
     hold[action] = false;
+    if (!short) return;
+    if (action === "forward" || action === "back") {
+      const dir = action === "back" ? -1 : 1;
+      const fx = -Math.sin(player.yaw);
+      const fz = -Math.cos(player.yaw);
+      goTo(player.x + fx * 1.6 * dir, player.z + fz * 1.6 * dir);
+    }
+    if (action === "left" || action === "right") {
+      player.yaw += (action === "left" ? 1 : -1) * 0.45;
+    }
   };
   el.addEventListener("pointerdown", start);
   el.addEventListener("pointerup", stop);
