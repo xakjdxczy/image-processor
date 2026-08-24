@@ -27,7 +27,7 @@ const OPENINGS = [
 ];
 
 const SPOTS = {
-  living: { x: 4.05, z: 6.42, yaw: 0.92 },
+  living: { x: 5.28, z: 7.18, yaw: 1.18 },
   dining: { x: 4.05, z: 4.15, yaw: 1.55 },
   kitchen: { x: 2.55, z: 2.35, yaw: 0.55 },
   foyer: { x: 6.35, z: 2.15, yaw: 0.05 },
@@ -166,7 +166,7 @@ function findPath(sx, sz, tx, tz) {
   return pathPts.filter((_, i) => i === pathPts.length - 1 || i % 2 === 0);
 }
 
-const player = { x: 4.05, z: 6.42, yaw: 0.92, pitch: -0.08 };
+const player = { x: 5.28, z: 7.18, yaw: 1.18, pitch: -0.08 };
 const keys = {};
 const hold = { forward: false, back: false, left: false, right: false };
 let path = [];
