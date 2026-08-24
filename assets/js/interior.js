@@ -266,24 +266,41 @@ export function buildInterior(THREE, scene, PLAN, ROOMS) {
   }
 
   function chair(x, z, yaw, dark) {
-    box(x, 0.24, z, 0.42, 0.06, 0.42, dark ? mats.darkWood : mats.wood, yaw);
-    box(x, 0.46, z, 0.4, 0.08, 0.4, mats.linen, yaw);
-    box(x + Math.sin(yaw) * 0.16, 0.78, z + Math.cos(yaw) * 0.16, 0.4, 0.46, 0.06, mats.linen, yaw);
+    const woodMat = dark ? mats.darkWood : mats.wood;
+    [-0.14, 0.14].forEach((ox) => {
+      [-0.14, 0.14].forEach((oz) => {
+        const rx = x + Math.cos(yaw) * ox - Math.sin(yaw) * oz;
+        const rz = z + Math.sin(yaw) * ox + Math.cos(yaw) * oz;
+        mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.42, 8), woodMat, rx, 0.21, rz);
+      });
+    });
+    box(x, 0.46, z, 0.42, 0.07, 0.42, mats.linen, yaw);
+    box(x + Math.sin(yaw) * 0.17, 0.8, z + Math.cos(yaw) * 0.17, 0.4, 0.5, 0.07, mats.linen, yaw);
+    box(x + Math.sin(yaw) * 0.17, 0.72, z + Math.cos(yaw) * 0.17, 0.06, 0.42, 0.06, woodMat, yaw);
+  }
+
+  function sofaSeat(x, z, w, d, yaw) {
+    box(x, 0.22, z, w, 0.2, d, mats.linen, yaw);
+    box(x, 0.4, z, w - 0.08, 0.16, d - 0.1, mats.linen, yaw);
+    mesh(new THREE.CapsuleGeometry(0.1, w * 0.55, 6, 10), mats.linen, x, 0.62, z - d * 0.28, yaw);
   }
 
   slats(0.12, 6.7, 3.2, 2.55, true, mats.wood);
   box(0.2, 1.35, 6.7, 0.04, 0.82, 1.28, mats.darkWood);
   box(0.28, 0.42, 6.7, 0.28, 0.06, 2.4, mats.marble);
   box(0.55, 1.1, 5.35, 0.42, 1.7, 0.28, mats.wood);
-  box(2.55, 0.18, 7.15, 2.3, 0.04, 1.7, mats.linen);
-  box(2.85, 0.38, 7.35, 1.7, 0.36, 0.72, mats.linen);
-  box(2.15, 0.4, 6.85, 0.9, 0.4, 0.7, mats.linen);
-  box(3.35, 0.4, 6.85, 0.7, 0.4, 0.7, mats.linen);
-  box(2.55, 0.52, 7.55, 0.28, 0.18, 0.22, mats.sage);
+  box(2.55, 0.16, 7.15, 2.4, 0.03, 1.85, mats.linen);
+  sofaSeat(2.85, 7.42, 1.65, 0.78, 0);
+  sofaSeat(2.05, 6.95, 0.85, 0.72, 0.4);
+  sofaSeat(3.55, 6.95, 0.78, 0.72, -0.35);
+  box(2.55, 0.54, 7.62, 0.3, 0.16, 0.2, mats.sage);
+  box(3.05, 0.54, 7.5, 0.22, 0.14, 0.18, mats.linen);
+  mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.08, 24), mats.linen, 2.55, 0.18, 7.15);
   box(1.95, 0.22, 6.85, 0.95, 0.32, 0.62, mats.darkWood);
   box(4.15, 0.28, 7.55, 0.38, 0.36, 0.38, mats.marble);
   chair(4.15, 6.55, 2.4, false);
-  pendant(2.55, 6.9, 0.28);
+  mesh(new THREE.TorusGeometry(0.32, 0.035, 10, 24), mats.glow, 2.55, 2.2, 6.9);
+  pendant(2.55, 6.9, 0.2);
   plant(4.55, 8.15, 1.15);
   box(4.35, 0.85, 8.15, 0.03, 1.45, 0.03, mats.metal);
   curtain(2.5, 8.52, 4.6, true);
@@ -322,12 +339,13 @@ export function buildInterior(THREE, scene, PLAN, ROOMS) {
   box(9.4, 1.55, 1.3, 0.62, 0.04, 0.08, mats.glow);
 
   slats(14.82, 7.85, 3.4, 2.5, true, mats.darkWood);
-  box(13.15, 0.28, 7.85, 2.15, 0.32, 1.85, mats.darkWood);
-  box(13.15, 0.5, 7.85, 2.05, 0.16, 1.75, mats.linen);
-  box(13.85, 0.72, 7.85, 0.18, 0.55, 1.55, mats.linen);
-  box(13.15, 0.62, 7.85, 1.7, 0.12, 1.4, mats.linen);
-  box(13.15, 0.58, 8.45, 1.5, 0.1, 0.45, mats.sage);
-  box(13.15, 0.34, 8.85, 1.55, 0.36, 0.42, mats.wood);
+  box(13.15, 0.22, 7.85, 2.2, 0.28, 1.9, mats.darkWood);
+  box(13.15, 0.46, 7.85, 2.05, 0.2, 1.75, mats.linen);
+  box(13.95, 0.78, 7.85, 0.16, 0.62, 1.6, mats.linen);
+  mesh(new THREE.BoxGeometry(0.48, 0.14, 0.42), mats.linen, 12.7, 0.64, 7.35);
+  mesh(new THREE.BoxGeometry(0.48, 0.14, 0.42), mats.linen, 13.25, 0.64, 7.35);
+  box(13.15, 0.58, 8.5, 1.55, 0.08, 0.5, mats.sage);
+  box(13.15, 0.34, 8.9, 1.6, 0.34, 0.4, mats.wood);
   box(12.15, 0.42, 7.15, 0.48, 0.42, 0.48, mats.stone);
   box(14.15, 0.42, 7.15, 0.48, 0.42, 0.48, mats.stone);
   mesh(new THREE.SphereGeometry(0.16, 18, 12), mats.glow, 12.15, 0.86, 7.15);
