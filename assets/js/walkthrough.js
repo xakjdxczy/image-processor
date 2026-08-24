@@ -296,8 +296,8 @@ function bindHold(el, action) {
     if (!short) return;
     if (action === "forward" || action === "back") {
       const dir = action === "back" ? -1 : 1;
-      const face = faceXZ(player.yaw);
-      goTo(player.x + face.x * 1.6 * dir, player.z + face.z * 1.6 * dir);
+      const face = lookFlat();
+      path = [{ x: player.x + face.x * 1.8 * dir, z: player.z + face.z * 1.8 * dir }];
     }
     if (action === "left" || action === "right") player.yaw += (action === "left" ? 1 : -1) * 0.45;
   };
@@ -352,6 +352,30 @@ function drawMap() {
   mapCtx.stroke();
 }
 
+const look = new THREE.Vector3();
+const right = new THREE.Vector3();
+
+function syncCamera() {
+  camera.position.set(player.x, EYE, player.z);
+  camera.rotation.y = player.yaw;
+  camera.rotation.x = player.pitch;
+  camera.updateMatrixWorld();
+}
+
+function lookFlat() {
+  syncCamera();
+  camera.getWorldDirection(look);
+  look.y = 0;
+  if (look.lengthSq() < 1e-8) {
+    const fallback = faceXZ(player.yaw);
+    look.set(fallback.x, 0, fallback.z);
+  } else {
+    look.normalize();
+  }
+  right.set(-look.z, 0, look.x);
+  return look;
+}
+
 let last = performance.now();
 let lastMeta = "";
 let lastMap = "";
@@ -362,10 +386,13 @@ function tick(now) {
   if (hold.right) player.yaw -= LOOK_SPEED * dt;
   const forward = (keys.KeyW || keys.ArrowUp || keys.w || hold.forward ? 1 : 0) + (keys.KeyS || keys.ArrowDown || keys.s || hold.back ? -1 : 0);
   const strafe = (keys.KeyD || keys.ArrowRight || keys.d ? 1 : 0) + (keys.KeyA || keys.ArrowLeft || keys.a ? -1 : 0);
+  const face = lookFlat();
   if (forward || strafe) {
     path = [];
-    const step = moveDelta(player.yaw, forward, strafe, SPEED * dt);
-    tryMove(player.x + step.x, player.z + step.z);
+    tryMove(
+      player.x + (face.x * forward + right.x * strafe) * SPEED * dt,
+      player.z + (face.z * forward + right.z * strafe) * SPEED * dt
+    );
   }
   if (path.length) {
     const next = path[0];
@@ -375,9 +402,7 @@ function tick(now) {
     if (dist < 0.12) path.shift();
     else tryMove(player.x + (dx / dist) * SPEED * dt, player.z + (dz / dist) * SPEED * dt);
   }
-  camera.position.set(player.x, EYE, player.z);
-  camera.rotation.y = player.yaw;
-  camera.rotation.x = player.pitch;
+  syncCamera();
   const room = roomAt(player.x, player.z);
   const metaKey = room ? room.slug : "";
   if (metaKey !== lastMeta) {
@@ -393,5 +418,5 @@ function tick(now) {
   requestAnimationFrame(tick);
 }
 
-window.__walk = { player, goTo, walkable, roomAt, faceXZ, moveDelta, tryMove };
+window.__walk = { player, goTo, walkable, roomAt, faceXZ, moveDelta, tryMove, lookFlat, camera };
 requestAnimationFrame(tick);

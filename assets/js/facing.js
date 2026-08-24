@@ -1,9 +1,10 @@
+// Three.js Y-rotation sends the camera's local -Z to (-sin(yaw), 0, -cos(yaw)).
 export function faceXZ(yaw) {
-  return { x: Math.sin(yaw), z: -Math.cos(yaw) };
+  return { x: -Math.sin(yaw), z: -Math.cos(yaw) };
 }
 
 export function rightXZ(yaw) {
-  return { x: Math.cos(yaw), z: Math.sin(yaw) };
+  return { x: Math.cos(yaw), z: -Math.sin(yaw) };
 }
 
 export function moveDelta(yaw, forward, strafe, speed) {
