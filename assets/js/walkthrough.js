@@ -73,6 +73,7 @@ function loadPhoto(src) {
   map.anisotropy = 8;
   map.minFilter = THREE.LinearFilter;
   map.generateMipmaps = false;
+  map.wrapS = map.wrapT = THREE.ClampToEdgeWrapping;
   photoMaps.set(src, map);
   return map;
 }
@@ -116,6 +117,7 @@ function photoFor(slug) {
 }
 
 function aimVisor(mesh, yaw) {
+  mesh.userData.heading = yaw;
   mesh.rotation.set(0, yaw, 0);
 }
 
@@ -459,10 +461,25 @@ function drawMap() {
 }
 
 function placeVisors() {
-  const dist = 7.4;
+  const dist = 6.8;
   [visorA, visorB].forEach((mesh) => {
-    const yaw = mesh.rotation.y;
-    mesh.position.set(player.x - Math.sin(yaw) * dist, EYE, player.z - Math.cos(yaw) * dist);
+    mesh.position.set(
+      player.x - Math.sin(player.yaw) * dist,
+      EYE,
+      player.z - Math.cos(player.yaw) * dist
+    );
+    mesh.rotation.set(0, player.yaw, 0);
+    const map = mesh.material.map;
+    if (!map) return;
+    const heading = mesh.userData.heading ?? player.yaw;
+    let dyaw = player.yaw - heading;
+    while (dyaw > Math.PI) dyaw -= Math.PI * 2;
+    while (dyaw < -Math.PI) dyaw += Math.PI * 2;
+    const rx = 0.76;
+    const ry = 0.8;
+    map.repeat.set(rx, ry);
+    map.offset.x = THREE.MathUtils.clamp(0.12 - dyaw * 0.2, 0, 1 - rx);
+    map.offset.y = THREE.MathUtils.clamp(0.1 + player.pitch * 0.18, 0, 1 - ry);
   });
 }
 
