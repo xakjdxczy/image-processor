@@ -1,6 +1,7 @@
 import * as THREE from "../vendor/three/three.module.js";
 import { ROOMS, PLAN } from "./plan-data.js";
 import { buildInterior } from "./interior.js";
+import { faceXZ, moveDelta } from "./facing.js";
 
 const EYE = 1.62;
 const SPEED = 3.6;
@@ -50,13 +51,12 @@ if (!mount) throw new Error("missing #walkthrough");
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(76, 1, 0.08, 50);
 camera.rotation.order = "YXZ";
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.25));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.12;
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.enabled = false;
 mount.insertBefore(renderer.domElement, mount.firstChild);
 
 let floors = [];
@@ -296,7 +296,8 @@ function bindHold(el, action) {
     if (!short) return;
     if (action === "forward" || action === "back") {
       const dir = action === "back" ? -1 : 1;
-      goTo(player.x - Math.sin(player.yaw) * 1.6 * dir, player.z - Math.cos(player.yaw) * 1.6 * dir);
+      const face = faceXZ(player.yaw);
+      goTo(player.x + face.x * 1.6 * dir, player.z + face.z * 1.6 * dir);
     }
     if (action === "left" || action === "right") player.yaw += (action === "left" ? 1 : -1) * 0.45;
   };
@@ -346,11 +347,14 @@ function drawMap() {
   mapCtx.strokeStyle = "#fff8e8";
   mapCtx.beginPath();
   mapCtx.moveTo(player.x * sx, player.z * sz);
-  mapCtx.lineTo(player.x * sx - Math.sin(player.yaw) * 12, player.z * sz - Math.cos(player.yaw) * 12);
+  const face = faceXZ(player.yaw);
+  mapCtx.lineTo(player.x * sx + face.x * 12, player.z * sz + face.z * 12);
   mapCtx.stroke();
 }
 
 let last = performance.now();
+let lastMeta = "";
+let lastMap = "";
 function tick(now) {
   const dt = Math.min(0.05, (now - last) / 1000);
   last = now;
@@ -359,10 +363,9 @@ function tick(now) {
   const forward = (keys.KeyW || keys.ArrowUp || keys.w || hold.forward ? 1 : 0) + (keys.KeyS || keys.ArrowDown || keys.s || hold.back ? -1 : 0);
   const strafe = (keys.KeyD || keys.ArrowRight || keys.d ? 1 : 0) + (keys.KeyA || keys.ArrowLeft || keys.a ? -1 : 0);
   if (forward || strafe) {
-    tryMove(
-      player.x + (-Math.sin(player.yaw) * forward + Math.cos(player.yaw) * strafe) * SPEED * dt,
-      player.z + (-Math.cos(player.yaw) * forward + Math.sin(player.yaw) * strafe) * SPEED * dt
-    );
+    path = [];
+    const step = moveDelta(player.yaw, forward, strafe, SPEED * dt);
+    tryMove(player.x + step.x, player.z + step.z);
   }
   if (path.length) {
     const next = path[0];
@@ -375,11 +378,20 @@ function tick(now) {
   camera.position.set(player.x, EYE, player.z);
   camera.rotation.y = player.yaw;
   camera.rotation.x = player.pitch;
-  setMeta();
-  drawMap();
+  const room = roomAt(player.x, player.z);
+  const metaKey = room ? room.slug : "";
+  if (metaKey !== lastMeta) {
+    lastMeta = metaKey;
+    setMeta();
+  }
+  const mapKey = `${player.x.toFixed(2)},${player.z.toFixed(2)},${player.yaw.toFixed(2)}`;
+  if (mapKey !== lastMap) {
+    lastMap = mapKey;
+    drawMap();
+  }
   renderer.render(scene, camera);
   requestAnimationFrame(tick);
 }
 
-window.__walk = { player, goTo, walkable, roomAt };
+window.__walk = { player, goTo, walkable, roomAt, faceXZ, moveDelta, tryMove };
 requestAnimationFrame(tick);

@@ -40,7 +40,7 @@ export function buildInterior(THREE, scene, PLAN, ROOMS, renderer) {
     t.colorSpace = THREE.SRGBColorSpace;
     t.wrapS = t.wrapT = THREE.RepeatWrapping;
     t.repeat.set(rx, ry);
-    t.anisotropy = 8;
+    t.anisotropy = 4;
     return t;
   }
   const texFloor = loadTex("assets/textures/tex-oak-floor.png", 8, 5.5);
@@ -74,17 +74,13 @@ export function buildInterior(THREE, scene, PLAN, ROOMS, renderer) {
 
   scene.background = new THREE.Color(0x16130f);
   scene.fog = new THREE.Fog(0x16130f, 18, 36);
-  scene.add(new THREE.HemisphereLight(0xfff3e0, 0x3d2c1c, 0.62));
-  const sun = new THREE.DirectionalLight(0xffe4bc, 1.35);
+  scene.add(new THREE.HemisphereLight(0xfff3e0, 0x3d2c1c, 0.9));
+  const sun = new THREE.DirectionalLight(0xffe4bc, 1.55);
   sun.position.set(4.2, 9.5, 16);
-  sun.castShadow = true;
-  sun.shadow.mapSize.set(2048, 2048);
-  sun.shadow.camera.left = -14;
-  sun.shadow.camera.right = 14;
-  sun.shadow.camera.top = 12;
-  sun.shadow.camera.bottom = -8;
-  sun.shadow.bias = -0.00025;
   scene.add(sun);
+  const fill = new THREE.DirectionalLight(0xfff1dc, 0.45);
+  fill.position.set(-8, 6, -4);
+  scene.add(fill);
 
   const mat = (opts) => new THREE.MeshStandardMaterial(opts);
   const mFloor = mat({ map: texFloor, roughness: 0.36, metalness: 0.03 });
@@ -132,7 +128,7 @@ export function buildInterior(THREE, scene, PLAN, ROOMS, renderer) {
     const m = new THREE.Mesh(geom, material);
     m.position.set(x, y, z);
     m.rotation.set(rx, ry, 0);
-    m.castShadow = m.receiveShadow = true;
+    m.castShadow = m.receiveShadow = false;
     g.add(m);
     return m;
   }
@@ -146,16 +142,14 @@ export function buildInterior(THREE, scene, PLAN, ROOMS, renderer) {
     return mesh(new THREE.SphereGeometry(r, 22, 16), material, x, y, z);
   }
   function warm(x, y, z, intensity, dist, color = 0xffd6a4) {
+    if (warm.count >= 5) return;
+    warm.count += 1;
     const light = new THREE.PointLight(color, intensity, dist, 1.55);
     light.position.set(x, y, z);
     scene.add(light);
   }
-  function spot(x, y, z, tx, ty, tz, intensity = 5.5) {
-    const s = new THREE.SpotLight(0xffe6c6, intensity, 9, 0.4, 0.48, 1.35);
-    s.position.set(x, y, z);
-    s.target.position.set(tx, ty, tz);
-    scene.add(s, s.target);
-  }
+  warm.count = 0;
+  function spot() {}
 
   function addFloor(w, d, material, x, z, y = 0.012) {
     const m = box(w, 0.024, d, material, x, y, z);
@@ -280,7 +274,7 @@ export function buildInterior(THREE, scene, PLAN, ROOMS, renderer) {
       dummy.updateMatrix();
       inst.setMatrixAt(i, dummy.matrix);
     }
-    inst.castShadow = inst.receiveShadow = true;
+    inst.castShadow = inst.receiveShadow = false;
     g.add(inst);
     return inst;
   }
@@ -349,13 +343,11 @@ export function buildInterior(THREE, scene, PLAN, ROOMS, renderer) {
 
   function cove(x, z, w, d) {
     box(w, 0.025, d, mGlow, x, 2.6, z);
-    warm(x, 2.52, z, 5.5, 6.2);
   }
 
   function downlight(x, z) {
     cyl(0.06, 0.06, 0.03, mBlack, x, 2.68, z, 12);
     cyl(0.04, 0.04, 0.02, mGlow, x, 2.66, z, 12);
-    warm(x, 2.45, z, 3.2, 4.2);
   }
 
   // —— 客厅：西墙格栅电视墙、奶油曲面沙发、南向落地窗 ——
