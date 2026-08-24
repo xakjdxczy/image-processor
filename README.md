@@ -20,7 +20,8 @@ python3 -m http.server 8080
 - `assets/plans/floorplan.svg` — 1:50 平面布置图（房间铺满 150㎡）
 - `assets/plans/lighting.svg` — 灯具布置图
 - `assets/renders/` — 客厅、餐厨、玄关、主卧、主卫、书房、次卧、材料色板、3D 去顶户型
-- `assets/js/dollhouse.js` — 实景 3D 环视（8 个方位写实去顶图，拖动旋转）
+- `assets/js/walkthrough.js` — 全景漫游：第一人称环视，点击地面 / WASD 走到任意位置
+- `assets/js/dollhouse.js` — 写实去顶户型鸟瞰
 - `scripts/build_floorplan.py` — 重新生成平面图
 
 风格：现代轻奢原木。效果图是方案意向，施工前需按现场墙体、承重和管井深化。

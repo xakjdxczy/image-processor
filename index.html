@@ -191,11 +191,16 @@
     .note { color: var(--muted); font-size: 0.92rem; }
 
     .dollhouse-wrap { position: relative; }
-    .dollhouse {
-      height: min(72vh, 640px);
-      background: #ece6da;
+    .dollhouse,
+    .walk-stage {
+      height: min(78vh, 720px);
+      background: #1c1812;
       overflow: hidden;
     }
+    .walk-stage canvas { width: 100%; height: 100%; display: block; cursor: grab; }
+    .walk-stage.is-dragging canvas { cursor: grabbing; }
+    .tour-hidden { display: none !important; }
+    .dollhouse-ui button.is-on { border-color: var(--gold); color: var(--gold); }
     .dollhouse canvas,
     .orbit-stage,
     .orbit-stage img { width: 100%; height: 100%; display: block; }
@@ -360,21 +365,30 @@
         <div class="section-head">
           <p class="kicker">03 / 3D</p>
           <h2>3D 看房</h2>
-          <p class="room-meta" id="tourMeta">左右拖动旋转实景去顶户型，滚轮缩放。写实家具和材质，不是白模。</p>
+          <p class="room-meta" id="tourMeta">全景漫游：拖动环视，点击地面走到任意位置，WASD 自由走。</p>
         </div>
         <div class="plan-frame dollhouse-wrap">
           <div class="dollhouse-ui">
+            <button type="button" data-mode="walk" class="is-on">全景漫游</button>
+            <button type="button" data-mode="orbit">户型鸟瞰</button>
+            <button type="button" data-spot="living">客厅</button>
+            <button type="button" data-spot="dining">餐厅</button>
+            <button type="button" data-spot="kitchen">厨房</button>
+            <button type="button" data-spot="foyer">玄关</button>
+            <button type="button" data-spot="study">书房</button>
+            <button type="button" data-spot="master">主卧</button>
             <button type="button" data-view="se">东南鸟瞰</button>
             <button type="button" data-view="sw">西南鸟瞰</button>
             <button type="button" data-view="top">正俯视</button>
           </div>
-          <div class="dollhouse is-photoreal" id="dollhouse" aria-label="可旋转的150平米实景3D户型">
+          <div class="walk-stage" id="walkthrough" aria-label="150平米全景漫游"></div>
+          <div class="dollhouse is-photoreal tour-hidden" id="dollhouse" aria-label="可旋转的150平米实景3D户型">
             <div class="orbit-stage">
               <img class="is-front" src="assets/renders/3d-dollhouse-se.png" alt="150平米东南向实景3D户型" />
             </div>
           </div>
         </div>
-        <p class="note">环视由 8 个方位的写实去顶模型组成，拖动即可转到下一角度。下面是单张大图。</p>
+        <p class="note">全景模式可走进每个房间并站在任意地面位置环视。户型鸟瞰仍是写实去顶图。</p>
         <div class="gallery wide" style="margin-top:1.1rem">
           <figure>
             <img src="assets/renders/3d-dollhouse-se.png" alt="东南向去顶3D户型效果" />
@@ -640,6 +654,29 @@
       if (event.target === lightbox) lightbox.close();
     });
   </script>
+  <script>
+    (function () {
+      const walk = document.getElementById("walkthrough");
+      const orbit = document.getElementById("dollhouse");
+      document.querySelectorAll("[data-mode]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const walkOn = btn.dataset.mode === "walk";
+          walk.classList.toggle("tour-hidden", !walkOn);
+          orbit.classList.toggle("tour-hidden", walkOn);
+          document.querySelectorAll("[data-mode]").forEach((item) => item.classList.toggle("is-on", item === btn));
+          window.dispatchEvent(new Event("resize"));
+        });
+      });
+    })();
+  </script>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./assets/vendor/three/three.module.js"
+    }
+  }
+  </script>
+  <script type="module" src="assets/js/walkthrough.js"></script>
   <script src="assets/js/dollhouse.js?v=real3d" defer></script>
 </body>
 </html>
