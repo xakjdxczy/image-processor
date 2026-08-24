@@ -2,8 +2,8 @@ import * as THREE from "../vendor/three/three.module.js";
 import { ROOMS, PLAN } from "./plan-data.js";
 
 const EYE = 1.62;
-const SPEED = 3.2;
-const RADIUS = 0.22;
+const SPEED = 3.6;
+const LOOK_SPEED = 1.7;
 
 const OPENINGS = [
   { x1: 0.15, y1: 4.8, x2: 5.25, y2: 4.8 },
@@ -42,13 +42,20 @@ const FURNITURE = [
 ];
 
 const SPOTS = {
-  living: { x: 2.7, z: 6.7, yaw: 0 },
+  living: { x: 3.15, z: 7.55, yaw: 0.15 },
   dining: { x: 2.4, z: 3.7, yaw: 0.2 },
   kitchen: { x: 1.8, z: 1.6, yaw: 2.6 },
   foyer: { x: 6.3, z: 1.4, yaw: 3.2 },
   study: { x: 9.4, z: 1.4, yaw: 1.2 },
   master: { x: 12.2, z: 7.7, yaw: 3.5 },
-  "bedroom-a": { x: 13.4, z: 4.2, yaw: 2.2 }
+  "bedroom-a": { x: 13.4, z: 4.2, yaw: 2.2 },
+  "bedroom-b": { x: 13.4, z: 1.4, yaw: 2.4 },
+  hall: { x: 6.3, z: 5.4, yaw: 0.1 },
+  "guest-bath": { x: 8.3, z: 4.2, yaw: 0.2 },
+  wic: { x: 10.7, z: 4.2, yaw: 0.2 },
+  "master-bath": { x: 8.3, z: 7.4, yaw: 0.2 },
+  "south-balcony": { x: 3.4, z: 9.25, yaw: 3.2 },
+  "service-balcony": { x: 4.4, z: 1.4, yaw: 1.6 }
 };
 
 const mount = document.getElementById("walkthrough");
@@ -85,15 +92,15 @@ const mats = {
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xd8cfc0);
-scene.fog = new THREE.Fog(0xd8cfc0, 14, 28);
+scene.fog = new THREE.Fog(0xd8cfc0, 16, 32);
 
-const camera = new THREE.PerspectiveCamera(78, 1, 0.08, 60);
+const camera = new THREE.PerspectiveCamera(92, 1, 0.08, 60);
 camera.rotation.order = "YXZ";
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
-mount.appendChild(renderer.domElement);
+mount.insertBefore(renderer.domElement, mount.firstChild);
 
 scene.add(new THREE.HemisphereLight(0xfff1d4, 0x6d6356, 0.95));
 const sun = new THREE.DirectionalLight(0xffe6b8, 1.05);
@@ -206,33 +213,111 @@ function mark(x, y, w, d, value) {
   }
 }
 
-ROOMS.forEach((room) => mark(room.x + 0.16, room.y + 0.16, room.w - 0.32, room.d - 0.32, 1));
+ROOMS.forEach((room) => mark(room.x + 0.12, room.y + 0.12, room.w - 0.24, room.d - 0.24, 1));
 OPENINGS.forEach((gap) => {
-  const pad = 0.28;
+  const pad = 0.42;
   mark(Math.min(gap.x1, gap.x2) - pad, Math.min(gap.y1, gap.y2) - pad, Math.abs(gap.x2 - gap.x1) + pad * 2, Math.abs(gap.y2 - gap.y1) + pad * 2, 1);
 });
-FURNITURE.forEach((item) => mark(item.x + 0.04, item.y + 0.04, item.w - 0.08, item.d - 0.08, 0));
 
 function walkable(x, z) {
-  if (x < 0.12 || z < 0.12 || x > PLAN.width - 0.12 || z > PLAN.depth - 0.12) return false;
-  return walk[cell(x, z)] === 1;
+  if (x < 0.08 || z < 0.08 || x > PLAN.width - 0.08 || z > PLAN.depth - 0.08) return false;
+  const ix = Math.floor(x / STEP);
+  const iz = Math.floor(z / STEP);
+  if (ix < 0 || iz < 0 || ix >= gw || iz >= gd) return false;
+  return walk[ix + iz * gw] === 1;
 }
 
-const player = { x: 2.7, z: 6.7, yaw: 0, pitch: 0 };
+function nearestWalkable(x, z) {
+  if (walkable(x, z)) return { x, z };
+  for (let r = 1; r <= 28; r += 1) {
+    for (let iz = -r; iz <= r; iz += 1) {
+      for (let ix = -r; ix <= r; ix += 1) {
+        if (Math.max(Math.abs(ix), Math.abs(iz)) !== r) continue;
+        const nx = x + ix * STEP;
+        const nz = z + iz * STEP;
+        if (walkable(nx, nz)) return { x: nx, z: nz };
+      }
+    }
+  }
+  return null;
+}
+
+function findPath(sx, sz, tx, tz) {
+  const start = nearestWalkable(sx, sz);
+  const goal = nearestWalkable(tx, tz);
+  if (!start || !goal) return [];
+  const si = Math.floor(start.x / STEP);
+  const sj = Math.floor(start.z / STEP);
+  const gi = Math.floor(goal.x / STEP);
+  const gj = Math.floor(goal.z / STEP);
+  const startKey = si + sj * gw;
+  const goalKey = gi + gj * gw;
+  if (walk[startKey] !== 1 || walk[goalKey] !== 1) return [];
+  if (startKey === goalKey) return [{ x: goal.x, z: goal.z }];
+
+  const prev = new Int32Array(gw * gd);
+  prev.fill(-1);
+  const q = new Int32Array(gw * gd);
+  let head = 0;
+  let tail = 0;
+  q[tail++] = startKey;
+  prev[startKey] = startKey;
+  const dirs = [1, 0, -1, 0, 0, 1, 0, -1, 1, 1, 1, -1, -1, 1, -1, -1];
+
+  while (head < tail) {
+    const cur = q[head++];
+    if (cur === goalKey) break;
+    const cx = cur % gw;
+    const cz = (cur - cx) / gw;
+    for (let d = 0; d < 16; d += 2) {
+      const nx = cx + dirs[d];
+      const nz = cz + dirs[d + 1];
+      if (nx < 0 || nz < 0 || nx >= gw || nz >= gd) continue;
+      if (dirs[d] !== 0 && dirs[d + 1] !== 0) {
+        if (walk[cx + nz * gw] !== 1 || walk[nx + cz * gw] !== 1) continue;
+      }
+      const nk = nx + nz * gw;
+      if (walk[nk] !== 1 || prev[nk] !== -1) continue;
+      prev[nk] = cur;
+      q[tail++] = nk;
+    }
+  }
+  if (prev[goalKey] === -1) return [goal];
+
+  const cells = [];
+  let cur = goalKey;
+  while (cur !== startKey) {
+    cells.push(cur);
+    cur = prev[cur];
+  }
+  cells.reverse();
+  const path = cells.map((key) => {
+    const ix = key % gw;
+    const iz = (key - ix) / gw;
+    return { x: (ix + 0.5) * STEP, z: (iz + 0.5) * STEP };
+  });
+  path[path.length - 1] = { x: goal.x, z: goal.z };
+  return path.filter((_, i) => i === path.length - 1 || i % 2 === 0);
+}
+
+const player = { x: 3.15, z: 7.55, yaw: 0.15, pitch: 0 };
 const keys = {};
-let target = null;
+const hold = { forward: false, back: false, left: false, right: false };
+let path = [];
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 let dragging = false;
-let moved = false;
+let looking = false;
 let lastX = 0;
 let lastY = 0;
+let travel = 0;
 
 function setPose(x, z, yaw) {
-  player.x = x;
-  player.z = z;
+  const spot = nearestWalkable(x, z) || { x, z };
+  player.x = spot.x;
+  player.z = spot.z;
   if (yaw != null) player.yaw = yaw;
-  target = null;
+  path = [];
 }
 
 function tryMove(nx, nz) {
@@ -247,7 +332,13 @@ function roomAt(x, z) {
 function setMeta() {
   if (!meta) return;
   const room = roomAt(player.x, player.z);
-  meta.innerHTML = "<strong>全景漫游</strong>　" + (room ? room.name + "　" + room.area.toFixed(2) + "㎡　" : "") + "拖动环视，点击地面走动，WASD 自由走。";
+  meta.innerHTML = "<strong>全景漫游</strong>　" + (room ? room.name + "　" + room.area.toFixed(2) + "㎡　" : "") + "拖动环视，点击地面或右侧平面走到任意位置。";
+}
+
+function goTo(x, z) {
+  const dest = nearestWalkable(x, z);
+  if (!dest) return;
+  path = findPath(player.x, player.z, dest.x, dest.z);
 }
 
 function resize() {
@@ -263,48 +354,72 @@ resize();
 
 const canvas = renderer.domElement;
 canvas.style.touchAction = "none";
+canvas.tabIndex = 0;
+
 canvas.addEventListener("pointerdown", (event) => {
+  if (event.target !== canvas) return;
   dragging = true;
-  moved = false;
+  looking = false;
+  travel = 0;
   lastX = event.clientX;
   lastY = event.clientY;
   mount.classList.add("is-dragging");
+  canvas.focus();
   canvas.setPointerCapture(event.pointerId);
 });
 canvas.addEventListener("pointermove", (event) => {
   if (!dragging) return;
   const dx = event.clientX - lastX;
   const dy = event.clientY - lastY;
-  if (Math.hypot(dx, dy) > 3) moved = true;
-  player.yaw -= dx * 0.005;
-  player.pitch = Math.max(-1.15, Math.min(1.15, player.pitch - dy * 0.004));
+  travel += Math.hypot(dx, dy);
   lastX = event.clientX;
   lastY = event.clientY;
+  if (travel < 12) return;
+  looking = true;
+  player.yaw -= dx * 0.0055;
+  player.pitch = Math.max(-1.2, Math.min(1.2, player.pitch - dy * 0.0045));
 });
 canvas.addEventListener("pointerup", (event) => {
   dragging = false;
   mount.classList.remove("is-dragging");
-  if (moved) return;
+  if (looking) return;
   const rect = canvas.getBoundingClientRect();
   pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
   pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
   raycaster.setFromCamera(pointer, camera);
   const hit = raycaster.intersectObjects(floors)[0];
-  if (!hit) return;
-  const dest = { x: hit.point.x, z: hit.point.z };
-  if (walkable(dest.x, dest.z)) target = dest;
+  if (hit) goTo(hit.point.x, hit.point.z);
 });
 
-window.addEventListener("keydown", (event) => {
-  keys[event.code] = true;
-  if (["KeyW", "KeyA", "KeyS", "KeyD", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.code)) {
+function onKey(event, down) {
+  keys[event.code] = down;
+  if (event.key) keys[event.key.toLowerCase()] = down;
+  const moveKey = ["KeyW", "KeyA", "KeyS", "KeyD", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.code) || ["w", "a", "s", "d"].includes((event.key || "").toLowerCase());
+  if (moveKey) {
     event.preventDefault();
-    target = null;
+    if (down) path = [];
   }
-});
-window.addEventListener("keyup", (event) => {
-  keys[event.code] = false;
-});
+}
+window.addEventListener("keydown", (event) => onKey(event, true));
+window.addEventListener("keyup", (event) => onKey(event, false));
+
+function bindHold(el, action) {
+  const start = (event) => {
+    event.preventDefault();
+    hold[action] = true;
+    if (action === "forward" || action === "back") path = [];
+  };
+  const stop = () => {
+    hold[action] = false;
+  };
+  el.addEventListener("pointerdown", start);
+  el.addEventListener("pointerup", stop);
+  el.addEventListener("pointerleave", stop);
+  el.addEventListener("pointercancel", stop);
+}
+
+document.querySelectorAll("[data-hold]").forEach((btn) => bindHold(btn, btn.dataset.hold));
+document.querySelectorAll("[data-go]").forEach((btn) => bindHold(btn, btn.dataset.go));
 
 document.querySelectorAll("[data-spot]").forEach((btn) => {
   btn.addEventListener("click", () => {
@@ -313,23 +428,76 @@ document.querySelectorAll("[data-spot]").forEach((btn) => {
   });
 });
 
+const mapHost = document.getElementById("walkMap");
+const mapCanvas = document.createElement("canvas");
+mapCanvas.width = 300;
+mapCanvas.height = 200;
+if (mapHost) mapHost.appendChild(mapCanvas);
+const mapCtx = mapCanvas.getContext("2d");
+
+if (mapHost) {
+  mapHost.addEventListener("pointerdown", (event) => {
+    event.stopPropagation();
+    const rect = mapCanvas.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * PLAN.width;
+    const z = ((event.clientY - rect.top) / rect.height) * PLAN.depth;
+    goTo(x, z);
+  });
+}
+
+function drawMap() {
+  if (!mapCtx) return;
+  mapCtx.clearRect(0, 0, 300, 200);
+  const sx = 300 / PLAN.width;
+  const sz = 200 / PLAN.depth;
+  ROOMS.forEach((room) => {
+    mapCtx.fillStyle = room.fill;
+    mapCtx.fillRect(room.x * sx, room.y * sz, room.w * sx, room.d * sz);
+  });
+  mapCtx.strokeStyle = "rgba(31,26,20,0.55)";
+  mapCtx.lineWidth = 1;
+  ROOMS.forEach((room) => {
+    mapCtx.strokeRect(room.x * sx, room.y * sz, room.w * sx, room.d * sz);
+  });
+  if (path.length) {
+    mapCtx.strokeStyle = "#2f6f55";
+    mapCtx.lineWidth = 2;
+    mapCtx.beginPath();
+    mapCtx.moveTo(player.x * sx, player.z * sz);
+    path.forEach((p) => mapCtx.lineTo(p.x * sx, p.z * sz));
+    mapCtx.stroke();
+  }
+  mapCtx.fillStyle = "#c0392b";
+  mapCtx.beginPath();
+  mapCtx.arc(player.x * sx, player.z * sz, 4, 0, Math.PI * 2);
+  mapCtx.fill();
+  mapCtx.strokeStyle = "#fff8e8";
+  mapCtx.beginPath();
+  mapCtx.moveTo(player.x * sx, player.z * sz);
+  mapCtx.lineTo(player.x * sx - Math.sin(player.yaw) * 12, player.z * sz - Math.cos(player.yaw) * 12);
+  mapCtx.stroke();
+}
+
 let last = performance.now();
 function tick(now) {
   const dt = Math.min(0.05, (now - last) / 1000);
   last = now;
-  const forward = (keys.KeyW || keys.ArrowUp ? 1 : 0) + (keys.KeyS || keys.ArrowDown ? -1 : 0);
-  const strafe = (keys.KeyD || keys.ArrowRight ? 1 : 0) + (keys.KeyA || keys.ArrowLeft ? -1 : 0);
+  if (hold.left) player.yaw += LOOK_SPEED * dt;
+  if (hold.right) player.yaw -= LOOK_SPEED * dt;
+  const forward = (keys.KeyW || keys.ArrowUp || keys.w || hold.forward ? 1 : 0) + (keys.KeyS || keys.ArrowDown || keys.s || hold.back ? -1 : 0);
+  const strafe = (keys.KeyD || keys.ArrowRight || keys.d ? 1 : 0) + (keys.KeyA || keys.ArrowLeft || keys.a ? -1 : 0);
   if (forward || strafe) {
     const fx = -Math.sin(player.yaw);
     const fz = -Math.cos(player.yaw);
     tryMove(player.x + (fx * forward + (-fz) * strafe) * SPEED * dt, player.z + (fz * forward + fx * strafe) * SPEED * dt);
   }
-  if (target) {
-    const dx = target.x - player.x;
-    const dz = target.z - player.z;
+  if (path.length) {
+    const next = path[0];
+    const dx = next.x - player.x;
+    const dz = next.z - player.z;
     const dist = Math.hypot(dx, dz);
-    if (dist < 0.08) {
-      target = null;
+    if (dist < 0.12) {
+      path.shift();
     } else {
       tryMove(player.x + (dx / dist) * SPEED * dt, player.z + (dz / dist) * SPEED * dt);
     }
@@ -338,6 +506,7 @@ function tick(now) {
   camera.rotation.y = player.yaw;
   camera.rotation.x = player.pitch;
   setMeta();
+  drawMap();
   renderer.render(scene, camera);
   requestAnimationFrame(tick);
 }

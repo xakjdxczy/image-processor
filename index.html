@@ -197,8 +197,50 @@
       background: #1c1812;
       overflow: hidden;
     }
+    .walk-stage { position: relative; }
     .walk-stage canvas { width: 100%; height: 100%; display: block; cursor: grab; }
     .walk-stage.is-dragging canvas { cursor: grabbing; }
+    .walk-hud {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .walk-minimap {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      width: min(42vw, 220px);
+      aspect-ratio: 15 / 10;
+      background: rgba(28, 24, 18, 0.78);
+      border: 1px solid rgba(255, 248, 232, 0.35);
+      pointer-events: auto;
+      cursor: crosshair;
+      overflow: hidden;
+    }
+    .walk-minimap canvas { width: 100%; height: 100%; display: block; }
+    .walk-pad {
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      display: grid;
+      grid-template-columns: repeat(3, 48px);
+      gap: 6px;
+      pointer-events: auto;
+    }
+    .walk-pad button {
+      height: 42px;
+      border: 1px solid rgba(255, 248, 232, 0.35);
+      background: rgba(28, 24, 18, 0.72);
+      color: #fff8e8;
+      font: inherit;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+    .walk-pad button:nth-child(1) { grid-column: 2; }
+    .walk-pad button:nth-child(2) { grid-column: 1; }
+    .walk-pad button:nth-child(3) { grid-column: 2; }
+    .walk-pad button:nth-child(4) { grid-column: 3; }
+    .dollhouse-ui button.tour-go { background: #2f6f55; color: #fff; border-color: #2f6f55; }
     .tour-hidden { display: none !important; }
     .dollhouse-ui button.is-on { border-color: var(--gold); color: var(--gold); }
     .dollhouse canvas,
@@ -365,7 +407,7 @@
         <div class="section-head">
           <p class="kicker">03 / 3D</p>
           <h2>3D 看房</h2>
-          <p class="room-meta" id="tourMeta">全景漫游：拖动环视，点击地面走到任意位置，WASD 自由走。</p>
+          <p class="room-meta" id="tourMeta">全景漫游：拖动环视，点击地面或右下角平面走到任意位置，左下角方向键或 WASD 行走。</p>
         </div>
         <div class="plan-frame dollhouse-wrap">
           <div class="dollhouse-ui">
@@ -377,18 +419,33 @@
             <button type="button" data-spot="foyer">玄关</button>
             <button type="button" data-spot="study">书房</button>
             <button type="button" data-spot="master">主卧</button>
+            <button type="button" data-spot="bedroom-a">次卧A</button>
+            <button type="button" data-spot="bedroom-b">次卧B</button>
+            <button type="button" data-spot="south-balcony">南阳台</button>
+            <button type="button" class="tour-go" data-go="forward">前进</button>
+            <button type="button" class="tour-go" data-go="back">后退</button>
             <button type="button" data-view="se">东南鸟瞰</button>
             <button type="button" data-view="sw">西南鸟瞰</button>
             <button type="button" data-view="top">正俯视</button>
           </div>
-          <div class="walk-stage" id="walkthrough" aria-label="150平米全景漫游"></div>
+          <div class="walk-stage" id="walkthrough" aria-label="150平米全景漫游">
+            <div class="walk-hud">
+              <div class="walk-pad" aria-label="行走方向">
+                <button type="button" data-hold="forward">前进</button>
+                <button type="button" data-hold="left">左转</button>
+                <button type="button" data-hold="back">后退</button>
+                <button type="button" data-hold="right">右转</button>
+              </div>
+              <div class="walk-minimap" id="walkMap" title="点击平面走到任意位置"></div>
+            </div>
+          </div>
           <div class="dollhouse is-photoreal tour-hidden" id="dollhouse" aria-label="可旋转的150平米实景3D户型">
             <div class="orbit-stage">
               <img class="is-front" src="assets/renders/3d-dollhouse-se.png" alt="150平米东南向实景3D户型" />
             </div>
           </div>
         </div>
-        <p class="note">全景模式可走进每个房间并站在任意地面位置环视。户型鸟瞰仍是写实去顶图。</p>
+        <p class="note">全景模式是第一人称环视：点地面或平面图可走到每个房间的任意位置。户型鸟瞰仍是写实去顶图。</p>
         <div class="gallery wide" style="margin-top:1.1rem">
           <figure>
             <img src="assets/renders/3d-dollhouse-se.png" alt="东南向去顶3D户型效果" />
