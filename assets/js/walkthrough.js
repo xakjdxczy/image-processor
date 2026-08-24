@@ -460,26 +460,25 @@ function drawMap() {
   mapCtx.stroke();
 }
 
+const lookDir = new THREE.Vector3();
 function placeVisors() {
-  const dist = 6.8;
+  const dist = 6.4;
+  camera.updateMatrixWorld();
+  lookDir.set(0, 0, -1).applyQuaternion(camera.quaternion);
   [visorA, visorB].forEach((mesh) => {
-    mesh.position.set(
-      player.x - Math.sin(player.yaw) * dist,
-      EYE,
-      player.z - Math.cos(player.yaw) * dist
-    );
-    mesh.rotation.set(0, player.yaw, 0);
+    mesh.position.copy(camera.position).addScaledVector(lookDir, dist);
+    mesh.quaternion.copy(camera.quaternion);
     const map = mesh.material.map;
     if (!map) return;
     const heading = mesh.userData.heading ?? player.yaw;
     let dyaw = player.yaw - heading;
     while (dyaw > Math.PI) dyaw -= Math.PI * 2;
     while (dyaw < -Math.PI) dyaw += Math.PI * 2;
-    const rx = 0.76;
-    const ry = 0.8;
+    const rx = 0.7;
+    const ry = 0.72;
     map.repeat.set(rx, ry);
-    map.offset.x = THREE.MathUtils.clamp(0.12 - dyaw * 0.2, 0, 1 - rx);
-    map.offset.y = THREE.MathUtils.clamp(0.1 + player.pitch * 0.18, 0, 1 - ry);
+    map.offset.x = THREE.MathUtils.clamp(0.15 - dyaw * 0.16, 0, 1 - rx);
+    map.offset.y = THREE.MathUtils.clamp(0.14 + player.pitch * 0.14, 0, 1 - ry);
   });
 }
 
