@@ -51,7 +51,7 @@
     }
 
     function setMeta(current) {
-      if (!meta) return;
+      if (!meta || mount.classList.contains("tour-hidden")) return;
       meta.innerHTML = "<strong>" + current.label + "</strong>　左右拖动旋转实景，滚轮缩放。写实去顶模型，不是白模。";
     }
 

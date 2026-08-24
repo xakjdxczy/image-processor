@@ -27,9 +27,9 @@ const OPENINGS = [
 ];
 
 const SPOTS = {
-  living: { x: 3.55, z: 7.55, yaw: 1.05 },
+  living: { x: 4.05, z: 6.42, yaw: 0.92 },
   dining: { x: 4.05, z: 4.15, yaw: 1.55 },
-  kitchen: { x: 2.35, z: 2.15, yaw: 0.15 },
+  kitchen: { x: 2.55, z: 2.35, yaw: 0.55 },
   foyer: { x: 6.35, z: 2.15, yaw: 0.05 },
   study: { x: 9.55, z: 2.15, yaw: 0.12 },
   master: { x: 11.15, z: 8.55, yaw: 0.35 },
@@ -59,7 +59,14 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 mount.insertBefore(renderer.domElement, mount.firstChild);
 
-const { floors } = buildInterior(THREE, scene, PLAN, ROOMS, renderer);
+let floors = [];
+try {
+  ({ floors } = buildInterior(THREE, scene, PLAN, ROOMS, renderer));
+} catch (err) {
+  console.error(err);
+  window.__interiorError = String(err && err.stack ? err.stack : err);
+  throw err;
+}
 
 const STEP = 0.1;
 const gw = Math.round(PLAN.width / STEP);
@@ -159,7 +166,7 @@ function findPath(sx, sz, tx, tz) {
   return pathPts.filter((_, i) => i === pathPts.length - 1 || i % 2 === 0);
 }
 
-const player = { x: 3.55, z: 7.55, yaw: 1.05, pitch: -0.06 };
+const player = { x: 4.05, z: 6.42, yaw: 0.92, pitch: -0.08 };
 const keys = {};
 const hold = { forward: false, back: false, left: false, right: false };
 let path = [];

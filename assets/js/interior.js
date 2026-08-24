@@ -111,8 +111,8 @@ export function buildInterior(THREE, scene, PLAN, ROOMS, renderer) {
   const mClay = mat({ color: 0xb08968, roughness: 0.62 });
   const mLeaf = mat({ color: 0x6a8a3c, roughness: 0.62 });
   const mGreen = mat({ color: 0x3f5a30, roughness: 0.7 });
-  const mGlow = mat({ color: 0xffe6c4, emissive: 0xffd09a, emissiveIntensity: 1.35, roughness: 1 });
-  const mLantern = mat({ color: 0xf6e6c6, emissive: 0xffd6a0, emissiveIntensity: 0.9, roughness: 0.68, transparent: true, opacity: 0.93 });
+  const mGlow = mat({ color: 0xffe6c4, emissive: 0xffd09a, emissiveIntensity: 0.72, roughness: 1 });
+  const mLantern = mat({ color: 0xf6e6c6, emissive: 0xffd6a0, emissiveIntensity: 0.55, roughness: 0.68, transparent: true, opacity: 0.93 });
   const mCarpet = mat({ color: 0xe3d0b0, roughness: 0.96 });
   const mMirror = mat({ color: 0xcfd8e0, roughness: 0.04, metalness: 0.92, envMapIntensity: 1.4 });
   const mSky = mat({ color: 0xb7d19a, emissive: 0x7fa35a, emissiveIntensity: 0.42 });
