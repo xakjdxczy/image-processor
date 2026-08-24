@@ -1,5 +1,6 @@
 import * as THREE from "../vendor/three/three.module.js";
 import { ROOMS, PLAN } from "./plan-data.js";
+import { buildInterior } from "./interior.js";
 
 const EYE = 1.62;
 const SPEED = 3.6;
@@ -26,12 +27,12 @@ const OPENINGS = [
 ];
 
 const SPOTS = {
-  living: { x: 3.15, z: 7.55, yaw: 0.15 },
-  dining: { x: 2.4, z: 3.7, yaw: 0.2 },
+  living: { x: 3.15, z: 7.55, yaw: 1.2 },
+  dining: { x: 2.4, z: 3.7, yaw: 0.15 },
   kitchen: { x: 1.8, z: 1.6, yaw: 2.6 },
   foyer: { x: 6.3, z: 1.4, yaw: 3.2 },
   study: { x: 9.4, z: 1.4, yaw: 1.2 },
-  master: { x: 12.2, z: 7.7, yaw: 3.5 },
+  master: { x: 12.2, z: 7.7, yaw: 5.2 },
   "bedroom-a": { x: 13.4, z: 4.2, yaw: 2.2 },
   "bedroom-b": { x: 13.4, z: 1.4, yaw: 2.4 },
   hall: { x: 6.3, z: 5.4, yaw: 0.1 },
@@ -42,119 +43,22 @@ const SPOTS = {
   "service-balcony": { x: 4.4, z: 1.4, yaw: 1.6 }
 };
 
-const PHOTOS = {
-  living: "assets/renders/living-room.png",
-  dining: "assets/renders/dining-kitchen.png",
-  kitchen: "assets/renders/dining-kitchen.png",
-  foyer: "assets/renders/foyer.png",
-  hall: "assets/renders/foyer.png",
-  study: "assets/renders/study.png",
-  master: "assets/renders/master-bedroom.png",
-  wic: "assets/renders/master-bedroom.png",
-  "master-bath": "assets/renders/master-bath.png",
-  "guest-bath": "assets/renders/master-bath.png",
-  "bedroom-a": "assets/renders/kids-bedroom.png",
-  "bedroom-b": "assets/renders/kids-bedroom.png",
-  "south-balcony": "assets/renders/living-room.png",
-  "service-balcony": "assets/renders/dining-kitchen.png"
-};
-
 const mount = document.getElementById("walkthrough");
 const meta = document.getElementById("tourMeta");
 if (!mount) throw new Error("missing #walkthrough");
 
-const loader = new THREE.TextureLoader();
-const photoMaps = new Map();
-
-function loadPhoto(src) {
-  if (photoMaps.has(src)) return photoMaps.get(src);
-  const map = loader.load(src);
-  map.colorSpace = THREE.SRGBColorSpace;
-  map.anisotropy = 8;
-  map.minFilter = THREE.LinearFilter;
-  map.generateMipmaps = false;
-  map.wrapS = map.wrapT = THREE.ClampToEdgeWrapping;
-  photoMaps.set(src, map);
-  return map;
-}
-
-Object.values(PHOTOS).forEach(loadPhoto);
-
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x1c1812);
-
-const camera = new THREE.PerspectiveCamera(86, 1, 0.08, 80);
+const camera = new THREE.PerspectiveCamera(78, 1, 0.08, 60);
 camera.rotation.order = "YXZ";
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.08;
+renderer.shadowMap.enabled = true;
 mount.insertBefore(renderer.domElement, mount.firstChild);
 
-function makeVisor() {
-  const geo = new THREE.PlaneGeometry(23, 13);
-  const mat = new THREE.MeshBasicMaterial({
-    transparent: true,
-    opacity: 0,
-    depthWrite: false,
-    toneMapped: false,
-    side: THREE.DoubleSide
-  });
-  const mesh = new THREE.Mesh(geo, mat);
-  mesh.renderOrder = -10;
-  scene.add(mesh);
-  return mesh;
-}
-
-const visorA = makeVisor();
-const visorB = makeVisor();
-let frontVisor = visorA;
-let backVisor = visorB;
-let fading = 0;
-let shownSlug = "";
-
-function photoFor(slug) {
-  return PHOTOS[slug] || PHOTOS.living;
-}
-
-function aimVisor(mesh, yaw) {
-  mesh.userData.heading = yaw;
-  mesh.rotation.set(0, yaw, 0);
-}
-
-function showRoom(slug, yaw) {
-  const map = loadPhoto(photoFor(slug));
-  if (slug === shownSlug) return;
-  if (!shownSlug) {
-    frontVisor.material.map = map;
-    frontVisor.material.opacity = 1;
-    frontVisor.material.needsUpdate = true;
-    aimVisor(frontVisor, yaw);
-    shownSlug = slug;
-    return;
-  }
-  backVisor.material.map = map;
-  backVisor.material.opacity = 0;
-  backVisor.material.needsUpdate = true;
-  aimVisor(backVisor, yaw);
-  fading = 0.001;
-  shownSlug = slug;
-}
-
-const floors = [];
-const floorMat = new THREE.MeshBasicMaterial({
-  color: 0x000000,
-  transparent: true,
-  opacity: 0,
-  depthWrite: false
-});
-ROOMS.forEach((room) => {
-  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(room.w, room.d), floorMat);
-  mesh.rotation.x = -Math.PI / 2;
-  mesh.position.set(room.x + room.w / 2, 0.01, room.y + room.d / 2);
-  mesh.userData.room = room;
-  scene.add(mesh);
-  floors.push(mesh);
-});
+const { floors } = buildInterior(THREE, scene, PLAN, ROOMS);
 
 const STEP = 0.1;
 const gw = Math.round(PLAN.width / STEP);
@@ -212,7 +116,6 @@ function findPath(sx, sz, tx, tz) {
   const goalKey = gi + gj * gw;
   if (walk[startKey] !== 1 || walk[goalKey] !== 1) return [];
   if (startKey === goalKey) return [{ x: goal.x, z: goal.z }];
-
   const prev = new Int32Array(gw * gd);
   prev.fill(-1);
   const q = new Int32Array(gw * gd);
@@ -221,7 +124,6 @@ function findPath(sx, sz, tx, tz) {
   q[tail++] = startKey;
   prev[startKey] = startKey;
   const dirs = [1, 0, -1, 0, 0, 1, 0, -1, 1, 1, 1, -1, -1, 1, -1, -1];
-
   while (head < tail) {
     const cur = q[head++];
     if (cur === goalKey) break;
@@ -241,7 +143,6 @@ function findPath(sx, sz, tx, tz) {
     }
   }
   if (prev[goalKey] === -1) return [goal];
-
   const cells = [];
   let cur = goalKey;
   while (cur !== startKey) {
@@ -258,7 +159,7 @@ function findPath(sx, sz, tx, tz) {
   return pathPts.filter((_, i) => i === pathPts.length - 1 || i % 2 === 0);
 }
 
-const player = { x: 3.15, z: 7.55, yaw: 0.15, pitch: 0 };
+const player = { x: 3.15, z: 7.55, yaw: 1.2, pitch: 0 };
 const keys = {};
 const hold = { forward: false, back: false, left: false, right: false };
 let path = [];
@@ -290,7 +191,7 @@ function roomAt(x, z) {
 function setMeta() {
   if (!meta) return;
   const room = roomAt(player.x, player.z);
-  meta.innerHTML = "<strong>全景漫游</strong>　" + (room ? room.name + "　" + room.area.toFixed(2) + "㎡　" : "") + "画面是该房间效果图。拖动环视，点击地面或平面走到任意位置。";
+  meta.innerHTML = "<strong>三维漫游</strong>　" + (room ? room.name + "　" + room.area.toFixed(2) + "㎡　" : "") + "拖动是在三维场景里转头看，家具有景深。点地面或平面可走到任意位置。";
 }
 
 function goTo(x, z) {
@@ -332,10 +233,10 @@ canvas.addEventListener("pointermove", (event) => {
   travel += Math.hypot(dx, dy);
   lastX = event.clientX;
   lastY = event.clientY;
-  if (travel < 18) return;
+  if (travel < 8) return;
   looking = true;
   player.yaw -= dx * 0.0055;
-  player.pitch = Math.max(-0.85, Math.min(0.85, player.pitch - dy * 0.0045));
+  player.pitch = Math.max(-1.15, Math.min(1.15, player.pitch - dy * 0.0045));
 });
 
 function pointOnFloor(clientX, clientY) {
@@ -419,14 +320,11 @@ mapCanvas.width = 300;
 mapCanvas.height = 200;
 if (mapHost) mapHost.appendChild(mapCanvas);
 const mapCtx = mapCanvas.getContext("2d");
-
 if (mapHost) {
   mapHost.addEventListener("pointerdown", (event) => {
     event.stopPropagation();
     const rect = mapCanvas.getBoundingClientRect();
-    const x = ((event.clientX - rect.left) / rect.width) * PLAN.width;
-    const z = ((event.clientY - rect.top) / rect.height) * PLAN.depth;
-    goTo(x, z);
+    goTo(((event.clientX - rect.left) / rect.width) * PLAN.width, ((event.clientY - rect.top) / rect.height) * PLAN.depth);
   });
 }
 
@@ -443,7 +341,6 @@ function drawMap() {
   ROOMS.forEach((room) => mapCtx.strokeRect(room.x * sx, room.y * sz, room.w * sx, room.d * sz));
   if (path.length) {
     mapCtx.strokeStyle = "#2f6f55";
-    mapCtx.lineWidth = 2;
     mapCtx.beginPath();
     mapCtx.moveTo(player.x * sx, player.z * sz);
     path.forEach((p) => mapCtx.lineTo(p.x * sx, p.z * sz));
@@ -458,28 +355,6 @@ function drawMap() {
   mapCtx.moveTo(player.x * sx, player.z * sz);
   mapCtx.lineTo(player.x * sx - Math.sin(player.yaw) * 12, player.z * sz - Math.cos(player.yaw) * 12);
   mapCtx.stroke();
-}
-
-const lookDir = new THREE.Vector3();
-function placeVisors() {
-  const dist = 6.4;
-  camera.updateMatrixWorld();
-  lookDir.set(0, 0, -1).applyQuaternion(camera.quaternion);
-  [visorA, visorB].forEach((mesh) => {
-    mesh.position.copy(camera.position).addScaledVector(lookDir, dist);
-    mesh.quaternion.copy(camera.quaternion);
-    const map = mesh.material.map;
-    if (!map) return;
-    const heading = mesh.userData.heading ?? player.yaw;
-    let dyaw = player.yaw - heading;
-    while (dyaw > Math.PI) dyaw -= Math.PI * 2;
-    while (dyaw < -Math.PI) dyaw += Math.PI * 2;
-    const rx = 0.7;
-    const ry = 0.72;
-    map.repeat.set(rx, ry);
-    map.offset.x = THREE.MathUtils.clamp(0.15 - dyaw * 0.16, 0, 1 - rx);
-    map.offset.y = THREE.MathUtils.clamp(0.14 + player.pitch * 0.14, 0, 1 - ry);
-  });
 }
 
 let last = performance.now();
@@ -503,34 +378,14 @@ function tick(now) {
     if (dist < 0.12) path.shift();
     else tryMove(player.x + (dx / dist) * SPEED * dt, player.z + (dz / dist) * SPEED * dt);
   }
-
-  const room = roomAt(player.x, player.z);
-  showRoom(room ? room.slug : "living", player.yaw);
-
-  if (fading) {
-    fading = Math.min(1, fading + dt * 2.4);
-    backVisor.material.opacity = fading;
-    frontVisor.material.opacity = 1 - fading * 0.85;
-    if (fading >= 1) {
-      const swap = frontVisor;
-      frontVisor = backVisor;
-      backVisor = swap;
-      frontVisor.material.opacity = 1;
-      backVisor.material.opacity = 0;
-      fading = 0;
-    }
-  }
-
   camera.position.set(player.x, EYE, player.z);
   camera.rotation.y = player.yaw;
   camera.rotation.x = player.pitch;
-  placeVisors();
   setMeta();
   drawMap();
   renderer.render(scene, camera);
   requestAnimationFrame(tick);
 }
 
-showRoom("living", player.yaw);
 window.__walk = { player, goTo, walkable, roomAt };
 requestAnimationFrame(tick);
